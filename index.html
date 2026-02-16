@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PharmChain — Blockchain Drug Verification & Tracking System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+/* =========================================================
+   GLOBAL TOKENS
+   ========================================================= */
+:root {
+  --c-bg:       #f4f6f9;
+  --c-surface:  #ffffff;
+  --c-border:   #dde3ee;
+  --c-navy:     #0a1f44;
+  --c-navy2:    #102a5e;
+  --c-blue:     #1a56db;
+  --c-blue-lt:  #e8f0fe;
+  --c-teal:     #0ea5a0;
+  --c-teal-lt:  #e6f8f7;
+  --c-green:    #16a34a;
+  --c-green-lt: #dcfce7;
+  --c-amber:    #d97706;
+  --c-amber-lt: #fef3c7;
+  --c-red:      #dc2626;
+  --c-red-lt:   #fee2e2;
+  --c-text:     #1e2d3d;
+  --c-sub:      #4b5d73;
+  --c-muted:    #8898aa;
+  --c-white:    #ffffff;
+  --r:          10px;
+  --r-lg:       16px;
+  --shadow:     0 2px 12px rgba(10,31,68,0.08);
+  --shadow-lg:  0 8px 40px rgba(10,31,68,0.14);
+  --ff-head:    'Syne', sans-serif;
+  --ff-body:    'DM Sans', sans-serif;
+  --ff-mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body { background: var(--c-bg); color: var(--c-text); font-family: var(--ff-body); line-height: 1.6; }
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; }
+button { cursor: pointer; font-family: var(--ff-body); }
+input, select, textarea { font-family: var(--ff-body); }
+
+/* =========================================================
+   UTILITY
+   ========================================================= */
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+.container-sm { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8  { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.gap-24 { gap: 24px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+.hidden { display: none !important; }
+.w-full { width: 100%; }
+.text-center { text-align: center; }
+.mt-8  { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mt-32 { margin-top: 32px; }
+.mb-8  { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.mb-32 { margin-bottom: 32px; }
+
+/* =========================================================
+   TYPOGRAPHY
+   ========================================================= */
+h1,h2,h3,h4,h5 { font-family: var(--ff-head); font-weight: 700; color: var(--c-navy); line-height: 1.2; }
+h1 { font-size: clamp(2rem, 4vw, 3.2rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); }
+h3 { font-size: 1.35rem; }
+h4 { font-size: 1.1rem; }
+p  { color: var(--c-sub); line-height: 1.7; }
+.text-blue  { color: var(--c-blue); }
+.text-teal  { color: var(--c-teal); }
+.text-green { color: var(--c-green); }
+.text-red   { color: var(--c-red); }
+.text-amber { color: var(--c-amber); }
+.text-muted { color: var(--c-muted); }
+.text-navy  { color: var(--c-navy); }
+.text-mono  { font-family: var(--ff-mono); font-size: 0.82rem; }
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 99px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.4px;
+  font-family: var(--ff-mono);
+}
+.badge-blue   { background: var(--c-blue-lt);  color: var(--c-blue); }
+.badge-teal   { background: var(--c-teal-lt);  color: var(--c-teal); }
+.badge-green  { background: var(--c-green-lt); color: var(--c-green); }
+.badge-amber  { background: var(--c-amber-lt); color: var(--c-amber); }
+.badge-red    { background: var(--c-red-lt);   color: var(--c-red); }
+.badge-navy   { background: var(--c-navy);     color: #fff; }
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 24px; border-radius: var(--r); font-size: 0.92rem;
+  font-weight: 600; font-family: var(--ff-head); border: none;
+  transition: all 0.18s ease; cursor: pointer; white-space: nowrap;
+}
+.btn-primary   { background: var(--c-blue); color: #fff; }
+.btn-primary:hover { background: #1447c0; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,86,219,0.3); }
+.btn-teal      { background: var(--c-teal); color: #fff; }
+.btn-teal:hover { background: #0c8e89; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(14,165,160,0.3); }
+.btn-navy      { background: var(--c-navy); color: #fff; }
+.btn-navy:hover { background: var(--c-navy2); transform: translateY(-1px); }
+.btn-outline   { background: transparent; border: 2px solid var(--c-blue); color: var(--c-blue); }
+.btn-outline:hover { background: var(--c-blue-lt); }
+.btn-outline-white { background: transparent; border: 2px solid rgba(255,255,255,0.6); color: #fff; }
+.btn-outline-white:hover { background: rgba(255,255,255,0.1); }
+.btn-ghost     { background: transparent; color: var(--c-sub); }
+.btn-ghost:hover { background: var(--c-bg); }
+.btn-red       { background: var(--c-red); color: #fff; }
+.btn-green     { background: var(--c-green); color: #fff; }
+.btn-sm        { padding: 7px 16px; font-size: 0.82rem; }
+.btn-lg        { padding: 15px 36px; font-size: 1.05rem; }
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label {
+  font-size: 0.8rem; font-weight: 600; color: var(--c-navy);
+  letter-spacing: 0.3px; text-transform: uppercase;
+}
+.form-control {
+  background: var(--c-surface); border: 1.5px solid var(--c-border);
+  border-radius: var(--r); padding: 10px 14px;
+  font-size: 0.92rem; color: var(--c-text); outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s; width: 100%;
+}
+.form-control:focus { border-color: var(--c-blue); box-shadow: 0 0 0 3px rgba(26,86,219,0.12); }
+.form-control::placeholder { color: var(--c-muted); }
+select.form-control option { background: var(--c-surface); }
+textarea.form-control { resize: vertical; min-height: 90px; }
+.form-hint { font-size: 0.75rem; color: var(--c-muted); margin-top: 3px; }
+.form-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.form-full   { grid-column: 1 / -1; }
+.form-row    { display: flex; gap: 12px; }
+.form-error  { color: var(--c-red); font-size: 0.78rem; margin-top: 3px; }
+
+/* =========================================================
+   CARD / PANEL
+   ========================================================= */
+.card {
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--r-lg); box-shadow: var(--shadow);
+}
+.card-header {
+  padding: 18px 24px; border-bottom: 1px solid var(--c-border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-family: var(--ff-head); font-size: 1rem; font-weight: 700; color: var(--c-navy); }
+.card-body  { padding: 24px; }
+.card-sm .card-body { padding: 16px; }
+.card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+.card-hover:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  font-family: var(--ff-head); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.8px; text-transform: uppercase; color: var(--c-muted);
+  padding: 10px 16px; text-align: left; border-bottom: 1.5px solid var(--c-border);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 13px 16px; font-size: 0.88rem; border-bottom: 1px solid var(--c-border);
+  color: var(--c-sub); vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #f8faff; }
+.data-table td strong { color: var(--c-text); }
+
+/* =========================================================
+   SECTION LAYOUTS
+   ========================================================= */
+.section { padding: 80px 0; }
+.section-sm { padding: 48px 0; }
+.section-title { margin-bottom: 12px; }
+.section-sub   { font-size: 1.05rem; color: var(--c-sub); max-width: 620px; }
+.section-label {
+  display: inline-block; font-family: var(--ff-mono); font-size: 0.72rem;
+  font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--c-blue); background: var(--c-blue-lt); padding: 4px 12px;
+  border-radius: 99px; margin-bottom: 12px;
+}
+
+/* =========================================================
+   TOP NOTICE BAR
+   ========================================================= */
+.notice-bar {
+  background: var(--c-navy); color: #fff; text-align: center;
+  padding: 9px 24px; font-size: 0.82rem; font-family: var(--ff-mono);
+  letter-spacing: 0.3px;
+}
+.notice-bar a { color: var(--c-teal); font-weight: 600; }
+.notice-bar span { color: rgba(255,255,255,0.5); margin: 0 10px; }
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+.navbar {
+  background: var(--c-surface); border-bottom: 1px solid var(--c-border);
+  position: sticky; top: 0; z-index: 900; box-shadow: var(--shadow);
+}
+.navbar-inner {
+  height: 68px; display: flex; align-items: center; justify-content: space-between;
+  gap: 24px;
+}
+.navbar-brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--c-blue), var(--c-teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #fff; box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+}
+.brand-name { font-family: var(--ff-head); font-size: 1.3rem; font-weight: 800; color: var(--c-navy); }
+.brand-name span { color: var(--c-blue); }
+
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-link {
+  padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+  color: var(--c-sub); transition: all 0.15s; white-space: nowrap;
+}
+.nav-link:hover, .nav-link.active { background: var(--c-blue-lt); color: var(--c-blue); }
+.nav-link.active { font-weight: 600; }
+
+.nav-search {
+  flex: 1; max-width: 360px; position: relative;
+}
+.nav-search input {
+  width: 100%; padding: 9px 14px 9px 40px; border-radius: 99px;
+  border: 1.5px solid var(--c-border); font-size: 0.88rem; outline: none;
+  background: var(--c-bg); transition: border-color 0.18s;
+}
+.nav-search input:focus { border-color: var(--c-blue); background: var(--c-surface); }
+.nav-search-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 15px; pointer-events: none;
+}
+.nav-actions { display: flex; align-items: center; gap: 8px; }
+
+/* =========================================================
+   MEGA NAV DROPDOWN (drug categories)
+   ========================================================= */
+.nav-has-dd { position: relative; }
+.nav-dd {
+  position: absolute; top: calc(100% + 8px); left: 0; min-width: 580px;
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-lg); padding: 24px;
+  display: none; z-index: 1000; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+}
+.nav-has-dd:hover .nav-dd { display: grid; }
+.nav-dd-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; }
+.nav-dd-item:hover { background: var(--c-bg); }
+.nav-dd-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.nav-dd-name { font-size: 0.88rem; font-weight: 600; color: var(--c-text); }
+.nav-dd-desc { font-size: 0.76rem; color: var(--c-muted); }
+
+/* =========================================================
+   HERO
+   ========================================================= */
+.hero {
+  background: linear-gradient(135deg, var(--c-navy) 0%, #0f3069 55%, #0d4a72 100%);
+  color: #fff; padding: 100px 0 80px; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 20% 50%, rgba(14,165,160,0.12) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(26,86,219,0.2) 0%, transparent 45%),
+                    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-content { position: relative; z-index: 1; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(14,165,160,0.2); border: 1px solid rgba(14,165,160,0.4);
+  color: #5eead4; padding: 6px 16px; border-radius: 99px;
+  font-family: var(--ff-mono); font-size: 0.78rem; font-weight: 500;
+  letter-spacing: 1px; margin-bottom: 24px;
+}
+.hero h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); color: #fff; margin-bottom: 20px; line-height: 1.1; }
+.hero h1 span { color: #5eead4; }
+.hero p { font-size: 1.1rem; color: rgba(255,255,255,0.75); max-width: 580px; margin-bottom: 36px; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 56px; }
+
+/* Hero search */
+.hero-search {
+  background: rgba(255,255,255,0.08); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2); border-radius: var(--r-lg);
+  padding: 20px 24px;
+}
+.hero-search-label { font-size: 0.82rem; color: rgba(255,255,255,0.6); margin-bottom: 10px; font-family: var(--ff-mono); letter-spacing: 0.5px; }
+.hero-search-row { display: flex; gap: 10px; }
+.hero-search-row input {
+  flex: 1; padding: 13px 18px; border-radius: 10px; border: none;
+  font-size: 0.95rem; outline: none; color: var(--c-text);
+}
+.hero-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.hero-tab {
+  padding: 5px 14px; border-radius: 99px; font-size: 0.8rem; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.65);
+  transition: all 0.15s; background: transparent;
+}
+.hero-tab.active { background: var(--c-teal); color: #fff; border-color: var(--c-teal); }
+
+/* Hero stats strip */
+.hero-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: rgba(255,255,255,0.1); border-radius: var(--r-lg);
+  overflow: hidden; margin-top: 60px;
+}
+.hero-stat {
+  background: rgba(255,255,255,0.04); padding: 20px 24px; text-align: center;
+}
+.hero-stat-num { font-family: var(--ff-head); font-size: 1.9rem; font-weight: 800; color: #5eead4; }
+.hero-stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.55); margin-top: 2px; font-family: var(--ff-mono); }
+
+/* =========================================================
+   DRUG SEARCH RESULTS BOX (dropdown)
+   ========================================================= */
+.search-results-box {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--c-surface); border: 1.5px solid var(--c-blue);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
+  z-index: 999; display: none; max-height: 380px; overflow-y: auto;
+}
+.search-results-box.open { display: block; }
+.search-result-item {
+  display: flex; align-items: center; gap: 14px; padding: 12px 18px;
+  cursor: pointer; border-bottom: 1px solid var(--c-border); transition: background 0.12s;
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: var(--c-blue-lt); }
+.sri-icon { width: 38px; height: 38px; border-radius: 8px; background: var(--c-blue-lt); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.sri-name { font-weight: 600; font-size: 0.92rem; color: var(--c-text); }
+.sri-meta { font-size: 0.78rem; color: var(--c-muted); font-family: var(--ff-mono); }
+.sri-badge { margin-left: auto; }
+
+/* =========================================================
+   FEATURE STRIP (how it works)
+   ========================================================= */
+.how-strip {
+  background: var(--c-surface); border-top: 1px solid var(--c-border); border-bottom: 1px solid var(--c-border);
+  padding: 28px 0;
+}
+.how-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
+.how-step {
+  text-align: center; padding: 12px 16px; position: relative;
+  border-right: 1px solid var(--c-border);
+}
+.how-step:last-child { border-right: none; }
+.how-step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--c-blue), var(--c-teal));
+  color: #fff; font-family: var(--ff-head); font-size: 0.85rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;
+}
+.how-step-label { font-size: 0.82rem; font-weight: 600; color: var(--c-navy); font-family: var(--ff-head); }
+.how-step-desc { font-size: 0.75rem; color: var(--c-muted); }
+
+/* =========================================================
+   DRUG CATEGORY GRID (like drugs.com A-Z / categories)
+   ========================================================= */
+.cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.cat-card {
+  background: var(--c-surface); border: 1.5px solid var(--c-border); border-radius: var(--r-lg);
+  padding: 20px 18px; display: flex; align-items: center; gap: 14px;
+  cursor: pointer; transition: all 0.2s;
+}
+.cat-card:hover { border-color: var(--c-blue); background: var(--c-blue-lt); transform: translateY(-2px); }
+.cat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.cat-name { font-family: var(--ff-head); font-size: 0.92rem; font-weight: 700; color: var(--c-navy); }
+.cat-count { font-size: 0.76rem; color: var(--c-muted); font-family: var(--ff-mono); }
+
+/* =========================================================
+   DRUG DETAIL PAGE
+   ========================================================= */
+.drug-hero {
+  background: linear-gradient(90deg, var(--c-navy) 0%, var(--c-navy2) 100%);
+  color: #fff; padding: 40px 0 32px;
+}
+.drug-hero h1 { color: #fff; font-size: clamp(1.6rem, 3.5vw, 2.5rem); margin-bottom: 6px; }
+.drug-hero-meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+
+.drug-layout { display: grid; grid-template-columns: 1fr 340px; gap: 28px; padding-top: 32px; }
+.drug-sidebar > * + * { margin-top: 20px; }
+
+.info-table { width: 100%; }
+.info-table tr td { padding: 10px 0; border-bottom: 1px solid var(--c-border); font-size: 0.9rem; }
+.info-table tr:last-child td { border-bottom: none; }
+.info-table td:first-child { color: var(--c-muted); width: 38%; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+.info-table td:last-child { color: var(--c-text); font-weight: 500; }
+
+.drug-tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--c-border); margin-bottom: 28px; }
+.drug-tab {
+  padding: 10px 20px; font-family: var(--ff-head); font-size: 0.88rem; font-weight: 700;
+  cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+  color: var(--c-muted); transition: all 0.15s;
+}
+.drug-tab.active { color: var(--c-blue); border-bottom-color: var(--c-blue); }
+.drug-tab:hover { color: var(--c-navy); }
+
+.drug-tab-pane { display: none; }
+.drug-tab-pane.active { display: block; }
+
+.drug-section-heading {
+  font-family: var(--ff-head); font-size: 1.05rem; font-weight: 700; color: var(--c-navy);
+  padding: 6px 0 6px 14px; border-left: 4px solid var(--c-blue); margin-bottom: 14px; margin-top: 28px;
+}
+.drug-section-heading:first-child { margin-top: 0; }
+
+.chain-verify-box {
+  background: linear-gradient(135deg, var(--c-navy), var(--c-navy2));
+  border-radius: var(--r-lg); padding: 22px; color: #fff;
+}
+.chain-hash {
+  font-family: var(--ff-mono); font-size: 0.72rem; color: rgba(255,255,255,0.5);
+  word-break: break-all; margin-top: 6px; line-height: 1.6;
+}
+.chain-verified { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #5eead4; font-weight: 600; margin-bottom: 10px; }
+
+/* Blockchain journey steps */
+.journey-steps { display: flex; flex-direction: column; gap: 0; }
+.journey-step {
+  display: flex; gap: 16px; position: relative;
+}
+.journey-step + .journey-step { margin-top: 0; }
+.journey-left { display: flex; flex-direction: column; align-items: center; }
+.journey-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid var(--c-blue); background: var(--c-surface); margin-top: 3px;
+}
+.journey-dot.done { background: var(--c-blue); }
+.journey-dot.current { background: var(--c-teal); border-color: var(--c-teal); box-shadow: 0 0 0 3px rgba(14,165,160,0.2); }
+.journey-line { flex: 1; width: 2px; background: var(--c-border); margin: 2px 0; min-height: 28px; }
+.journey-content { padding-bottom: 22px; }
+.journey-content:last-child { padding-bottom: 0; }
+.journey-title { font-weight: 700; font-size: 0.88rem; color: var(--c-navy); }
+.journey-meta { font-size: 0.78rem; color: var(--c-muted); font-family: var(--ff-mono); }
+.journey-detail { font-size: 0.82rem; color: var(--c-sub); margin-top: 3px; }
+
+/* =========================================================
+   PAGES — AUTH (Login / Register)
+   ========================================================= */
+.auth-page { min-height: 100vh; display: flex; flex-direction: column; }
+.auth-split { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+.auth-visual {
+  background: linear-gradient(150deg, var(--c-navy) 0%, #0f3069 60%, #0d4a72 100%);
+  display: flex; flex-direction: column; justify-content: center; padding: 60px;
+  position: relative; overflow: hidden;
+}
+.auth-visual::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+.auth-visual-content { position: relative; z-index: 1; }
+.auth-visual h2 { color: #fff; font-size: 2rem; margin-bottom: 14px; }
+.auth-visual p { color: rgba(255,255,255,0.65); font-size: 0.95rem; }
+.auth-visual-features { margin-top: 36px; display: flex; flex-direction: column; gap: 14px; }
+.auth-feature { display: flex; align-items: flex-start; gap: 12px; }
+.auth-feature-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.auth-feature-text strong { display: block; color: #fff; font-size: 0.9rem; margin-bottom: 2px; }
+.auth-feature-text span { color: rgba(255,255,255,0.55); font-size: 0.8rem; }
+
+.auth-form-area {
+  background: var(--c-bg); display: flex; align-items: center; justify-content: center; padding: 48px 40px;
+}
+.auth-form-box { width: 100%; max-width: 440px; }
+.auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; }
+.auth-switch { font-size: 0.88rem; color: var(--c-sub); margin-top: 20px; text-align: center; }
+.auth-switch a { color: var(--c-blue); font-weight: 600; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--c-border); }
+.auth-divider span { font-size: 0.78rem; color: var(--c-muted); }
+.role-select-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.role-opt {
+  border: 2px solid var(--c-border); border-radius: 10px; padding: 12px 8px;
+  text-align: center; cursor: pointer; transition: all 0.15s;
+}
+.role-opt:hover { border-color: var(--c-blue); background: var(--c-blue-lt); }
+.role-opt.selected { border-color: var(--c-blue); background: var(--c-blue-lt); }
+.role-opt-icon { font-size: 24px; margin-bottom: 4px; }
+.role-opt-name { font-size: 0.75rem; font-weight: 700; font-family: var(--ff-head); color: var(--c-navy); }
+
+/* =========================================================
+   DASHBOARD LAYOUT
+   ========================================================= */
+.dash-wrap { display: flex; min-height: calc(100vh - 68px); }
+.dash-sidebar {
+  width: 240px; flex-shrink: 0; background: var(--c-navy);
+  display: flex; flex-direction: column; position: sticky; top: 68px; height: calc(100vh - 68px);
+  overflow-y: auto;
+}
+.dash-sidebar-section {
+  padding: 18px 16px 6px; font-family: var(--ff-mono); font-size: 0.65rem;
+  letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.35);
+}
+.dash-nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+  color: rgba(255,255,255,0.65); font-size: 0.88rem; cursor: pointer;
+  border-left: 3px solid transparent; transition: all 0.15s;
+}
+.dash-nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; border-left-color: rgba(255,255,255,0.3); }
+.dash-nav-item.active { background: rgba(26,86,219,0.25); color: #fff; border-left-color: var(--c-blue); }
+.dash-nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.dash-badge { margin-left: auto; background: var(--c-red); color: #fff; font-family: var(--ff-mono); font-size: 0.65rem; padding: 1px 7px; border-radius: 99px; }
+.dash-content { flex: 1; padding: 32px; overflow-x: hidden; }
+
+/* Stat cards */
+.stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--r-lg); padding: 20px 22px; position: relative; overflow: hidden;
+  transition: transform 0.2s;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.stat-card-bar {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+}
+.stat-bar-blue   { background: var(--c-blue); }
+.stat-bar-teal   { background: var(--c-teal); }
+.stat-bar-green  { background: var(--c-green); }
+.stat-bar-amber  { background: var(--c-amber); }
+.stat-bar-red    { background: var(--c-red); }
+.stat-label { font-size: 0.75rem; color: var(--c-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.stat-value { font-family: var(--ff-head); font-size: 2rem; font-weight: 800; color: var(--c-navy); line-height: 1; }
+.stat-change { font-size: 0.78rem; margin-top: 4px; font-family: var(--ff-mono); }
+.stat-icon { position: absolute; top: 16px; right: 18px; font-size: 26px; opacity: 0.15; }
+
+/* =========================================================
+   DRUG A-Z INDEX
+   ========================================================= */
+.az-bar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 24px; }
+.az-btn {
+  width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid var(--c-border);
+  display: flex; align-items: center; justify-content: center; font-family: var(--ff-head);
+  font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+  background: var(--c-surface); color: var(--c-sub);
+}
+.az-btn:hover, .az-btn.active { background: var(--c-blue); color: #fff; border-color: var(--c-blue); }
+
+/* =========================================================
+   TRACKING PAGE
+   ========================================================= */
+.track-layout { display: grid; grid-template-columns: 1fr 420px; gap: 28px; }
+.track-map-wrap {
+  background: linear-gradient(150deg, #e8f0fe 0%, #e6f8f7 100%);
+  border-radius: var(--r-lg); border: 1px solid var(--c-border);
+  min-height: 340px; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden; flex-direction: column; gap: 12px;
+  font-size: 0.88rem; color: var(--c-sub);
+}
+.track-map-bg { position: absolute; inset: 0; opacity: 0.08; background: repeating-linear-gradient(0deg, var(--c-blue) 0, var(--c-blue) 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, var(--c-blue) 0, var(--c-blue) 1px, transparent 1px, transparent 40px); }
+.pulse-dot {
+  width: 12px; height: 12px; border-radius: 50%; background: var(--c-blue);
+  position: absolute; box-shadow: 0 0 0 0 rgba(26,86,219,0.4);
+  animation: pulse-anim 2s infinite;
+}
+@keyframes pulse-anim {
+  0%   { box-shadow: 0 0 0 0 rgba(26,86,219,0.4); }
+  70%  { box-shadow: 0 0 0 14px rgba(26,86,219,0); }
+  100% { box-shadow: 0 0 0 0 rgba(26,86,219,0); }
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+.footer {
+  background: var(--c-navy); color: rgba(255,255,255,0.65); padding: 64px 0 0;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+.footer-brand h3 { color: #fff; font-size: 1.2rem; margin-bottom: 10px; }
+.footer-brand p { font-size: 0.85rem; line-height: 1.7; max-width: 320px; }
+.footer-col h4 { color: #fff; font-size: 0.88rem; font-weight: 700; margin-bottom: 16px; font-family: var(--ff-head); letter-spacing: 0.5px; text-transform: uppercase; }
+.footer-links { display: flex; flex-direction: column; gap: 8px; }
+.footer-link { font-size: 0.85rem; transition: color 0.15s; }
+.footer-link:hover { color: #fff; }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1); padding: 20px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.8rem;
+}
+.footer-badges { display: flex; gap: 10px; }
+.f-badge {
+  border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 10px;
+  font-family: var(--ff-mono); font-size: 0.68rem; color: rgba(255,255,255,0.4);
+}
+
+/* =========================================================
+   ALERT / NOTIFICATION TOAST
+   ========================================================= */
+#toast {
+  position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+  background: var(--c-navy); color: #fff; padding: 14px 22px;
+  border-radius: 12px; font-size: 0.88rem; box-shadow: var(--shadow-lg);
+  border-left: 4px solid var(--c-teal); opacity: 0; transform: translateY(16px);
+  transition: all 0.3s ease; pointer-events: none; max-width: 340px;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(10,31,68,0.55); z-index: 2000; align-items: center; justify-content: center; }
+.modal-backdrop.open { display: flex; }
+.modal-box {
+  background: var(--c-surface); border-radius: var(--r-lg);
+  width: 90vw; max-width: 600px; max-height: 88vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg); animation: modalIn 0.22s ease;
+}
+@keyframes modalIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-header { padding: 22px 24px; border-bottom: 1px solid var(--c-border); display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-size: 1.05rem; color: var(--c-navy); }
+.modal-close { background: none; border: none; font-size: 22px; color: var(--c-muted); cursor: pointer; line-height: 1; }
+.modal-close:hover { color: var(--c-red); }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--c-border); display: flex; gap: 10px; justify-content: flex-end; }
+
+/* =========================================================
+   BREADCRUMB
+   ========================================================= */
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--c-muted); margin-bottom: 20px; }
+.breadcrumb a { color: var(--c-blue); }
+.breadcrumb span { color: var(--c-muted); }
+
+/* =========================================================
+   PROGRESS / STEPPER
+   ========================================================= */
+.stepper { display: flex; align-items: center; margin-bottom: 32px; }
+.stepper-step { display: flex; align-items: center; gap: 8px; }
+.stepper-circle {
+  width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--c-border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-head); font-size: 0.8rem; font-weight: 700; background: var(--c-surface);
+}
+.stepper-circle.done   { background: var(--c-blue); border-color: var(--c-blue); color: #fff; }
+.stepper-circle.active { background: var(--c-surface); border-color: var(--c-blue); color: var(--c-blue); }
+.stepper-label { font-size: 0.82rem; font-weight: 600; color: var(--c-sub); }
+.stepper-line  { flex: 1; height: 2px; background: var(--c-border); margin: 0 12px; }
+
+/* =========================================================
+   DRUG PROFILE SCORES (like drugs.com side widgets)
+   ========================================================= */
+.score-ring {
+  width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-head); font-size: 1.6rem; font-weight: 800; flex-shrink: 0;
+}
+.score-ring.excellent { background: conic-gradient(var(--c-green) 90%, var(--c-border) 0); color: var(--c-green); }
+.score-ring.good { background: conic-gradient(var(--c-teal) 75%, var(--c-border) 0); color: var(--c-teal); }
+.score-ring.caution { background: conic-gradient(var(--c-amber) 55%, var(--c-border) 0); color: var(--c-amber); }
+
+/* =========================================================
+   WARNINGS BOX
+   ========================================================= */
+.warning-box {
+  border-radius: var(--r); padding: 16px 18px;
+  display: flex; gap: 12px; align-items: flex-start; margin-bottom: 16px;
+}
+.warning-box.red    { background: var(--c-red-lt);   border-left: 4px solid var(--c-red); }
+.warning-box.amber  { background: var(--c-amber-lt); border-left: 4px solid var(--c-amber); }
+.warning-box.blue   { background: var(--c-blue-lt);  border-left: 4px solid var(--c-blue); }
+.warning-box.green  { background: var(--c-green-lt); border-left: 4px solid var(--c-green); }
+.warning-icon { font-size: 18px; margin-top: 2px; }
+.warning-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 3px; }
+.warning-text  { font-size: 0.85rem; color: var(--c-sub); line-height: 1.6; }
+
+/* =========================================================
+   CHAIN EXPLORER WIDGET
+   ========================================================= */
+.chain-blocks { display: flex; gap: 0; overflow-x: auto; padding: 8px 0; }
+.chain-blk {
+  min-width: 120px; background: var(--c-surface); border: 1.5px solid var(--c-border);
+  border-radius: 10px; padding: 12px; flex-shrink: 0; cursor: pointer;
+  transition: border-color 0.15s; text-align: center;
+}
+.chain-blk:hover { border-color: var(--c-blue); }
+.chain-blk-num { font-family: var(--ff-head); font-size: 0.72rem; color: var(--c-blue); font-weight: 700; margin-bottom: 4px; }
+.chain-blk-data { font-family: var(--ff-mono); font-size: 0.65rem; color: var(--c-sub); word-break: break-all; }
+.chain-blk-status { font-size: 0.7rem; margin-top: 5px; }
+.chain-arrow { display: flex; align-items: center; padding: 0 6px; color: var(--c-blue); font-size: 1.2rem; }
+
+/* =========================================================
+   PAGE VISIBILITY CONTROL
+   ========================================================= */
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+/* =========================================================
+   MISC WIDGETS
+   ========================================================= */
+.tag { display: inline-flex; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; background: var(--c-bg); border: 1px solid var(--c-border); color: var(--c-sub); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.divider { border: none; border-top: 1px solid var(--c-border); margin: 24px 0; }
+.highlight-box { background: var(--c-blue-lt); border-radius: var(--r); padding: 16px 18px; border: 1px solid rgba(26,86,219,0.2); }
+.highlight-box-teal { background: var(--c-teal-lt); border: 1px solid rgba(14,165,160,0.2); }
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.85rem; }
+.font-mono { font-family: var(--ff-mono); }
+.font-bold { font-weight: 700; }
+.font-head { font-family: var(--ff-head); }
+.color-blue { color: var(--c-blue); }
+.color-teal { color: var(--c-teal); }
+.color-green { color: var(--c-green); }
+.truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: 99px; padding: 4px 12px; font-size: 0.8rem; font-weight: 500;
+}
+.online-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c-green); animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+</style>
+</head>
+<body>
+
+<!-- =========================================================
+     NOTICE BAR
+     ========================================================= -->
+<div class="notice-bar">
+  🔒 All drug records secured by SHA-256 blockchain hashing &nbsp;<span>|</span>&nbsp;
+  <a href="#" onclick="showPage('verify')">Verify a drug now →</a>
+  <span>|</span>
+  Powered by <strong>PharmChain Network</strong>
+</div>
+
+<!-- =========================================================
+     NAVBAR
+     ========================================================= -->
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+
+      <div class="navbar-brand" style="cursor:pointer;" onclick="showPage('home')">
+        <div class="brand-mark">⛓</div>
+        <div class="brand-name">Pharm<span>Chain</span></div>
+      </div>
+
+      <!-- Nav links -->
+      <div class="nav-links">
+        <span class="nav-link active" onclick="showPage('home')">Home</span>
+
+        <span class="nav-link nav-has-dd" onclick="showPage('drugs')">
+          Drug Database ▾
+          <div class="nav-dd">
+            <div class="nav-dd-item" onclick="showPage('drugs')"><div class="nav-dd-icon" style="background:#e8f0fe;">💊</div><div><div class="nav-dd-name">Browse All Drugs</div><div class="nav-dd-desc">Search our full database</div></div></div>
+            <div class="nav-dd-item" onclick="drugDetail('amoxicillin')"><div class="nav-dd-icon" style="background:#e6f8f7;">🔍</div><div><div class="nav-dd-name">Drug Details</div><div class="nav-dd-desc">Full profiles & blockchain info</div></div></div>
+            <div class="nav-dd-item"><div class="nav-dd-icon" style="background:#dcfce7;">📋</div><div><div class="nav-dd-name">Drug Categories</div><div class="nav-dd-desc">Browse by ATC category</div></div></div>
+            <div class="nav-dd-item" onclick="showPage('verify')"><div class="nav-dd-icon" style="background:#fef3c7;">✅</div><div><div class="nav-dd-name">Verify Authenticity</div><div class="nav-dd-desc">Blockchain verification tool</div></div></div>
+            <div class="nav-dd-item"><div class="nav-dd-icon" style="background:#fee2e2;">⚠️</div><div><div class="nav-dd-name">Recalls & Alerts</div><div class="nav-dd-desc">Active drug recalls</div></div></div>
+            <div class="nav-dd-item"><div class="nav-dd-icon" style="background:#ede9fe;">🧪</div><div><div class="nav-dd-name">Drug Interactions</div><div class="nav-dd-desc">Check drug interactions</div></div></div>
+          </div>
+        </span>
+
+        <span class="nav-link" onclick="showPage('tracking')">Track Shipment</span>
+        <span class="nav-link" onclick="showPage('verify')">Verify Drug</span>
+        <span class="nav-link" onclick="showPage('about')">About</span>
+      </div>
+
+      <!-- Nav search -->
+      <div class="nav-search" style="position:relative;">
+        <span class="nav-search-icon">🔍</span>
+        <input type="text" placeholder="Search drugs, batch codes..." id="navSearch" oninput="navSearchInput(this.value)" onblur="setTimeout(()=>closeNavSearch(),200)"/>
+        <div class="search-results-box" id="navSearchResults"></div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn btn-outline btn-sm" onclick="showPage('login')">Sign In</button>
+        <button class="btn btn-primary btn-sm" onclick="showPage('register')">Register</button>
+      </div>
+
+    </div>
+  </div>
+</nav>
+
+
+<!-- =========================================================
+     ██ PAGE: HOME
+     ========================================================= -->
+<div class="page-section active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div style="display:grid; grid-template-columns: 1fr 420px; gap: 48px; align-items: center;">
+        <div class="hero-content">
+          <div class="hero-eyebrow">
+            <div class="online-dot"></div>
+            Blockchain-Secured Drug Verification Network
+          </div>
+          <h1>Verify Every Drug.<br/><span>Trust the Chain.</span></h1>
+          <p>PharmChain is a comprehensive blockchain-powered platform for drug registration, verification, supply chain tracking, and distribution management — from manufacturer to patient.</p>
+          <div class="hero-actions">
+            <button class="btn btn-teal btn-lg" onclick="showPage('verify')">✅ Verify a Drug</button>
+            <button class="btn btn-outline-white btn-lg" onclick="showPage('register')">Create Account →</button>
+          </div>
+          <div class="hero-search">
+            <div class="hero-search-label">SEARCH DRUG DATABASE</div>
+            <div class="hero-tabs">
+              <button class="hero-tab active">💊 Drug Name</button>
+              <button class="hero-tab" onclick="setHeroTab(this)">🔢 NAFDAC Code</button>
+              <button class="hero-tab" onclick="setHeroTab(this)">📦 Batch Number</button>
+            </div>
+            <div class="hero-search-row">
+              <input type="text" id="heroSearch" placeholder="e.g. Amoxicillin, Paracetamol, Metformin..." oninput="heroSearchInput(this.value)"/>
+              <button class="btn btn-teal" onclick="doHeroSearch()">Search</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.25);">
+            <div class="card-header" style="background: linear-gradient(90deg,#0a1f44,#102a5e);">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:18px;">⛓</span>
+                <span style="font-family:var(--ff-head);font-size:0.9rem;color:#fff;font-weight:700;">Blockchain Live Feed</span>
+              </div>
+              <div class="pill" style="border-color:rgba(14,165,160,0.5);background:rgba(14,165,160,0.1);">
+                <div class="online-dot"></div>
+                <span style="font-size:0.72rem;color:#5eead4;font-family:var(--ff-mono);">LIVE</span>
+              </div>
+            </div>
+            <div class="card-body" style="padding:16px;">
+              <div id="liveFeedList" style="display:flex;flex-direction:column;gap:8px;"></div>
+              <hr class="divider"/>
+              <div style="text-align:center;">
+                <span style="font-family:var(--ff-mono);font-size:0.72rem;color:var(--c-muted);">Latest Block: </span>
+                <span style="font-family:var(--ff-mono);font-size:0.72rem;color:var(--c-blue);font-weight:600;" id="homeBlockNum">#2,847,391</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-num" id="statDrugs">14,827</div><div class="hero-stat-label">Registered Drugs</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" id="statVerify">3,041</div><div class="hero-stat-label">Verified Today</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">412</div><div class="hero-stat-label">Certified Distributors</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">99.97%</div><div class="hero-stat-label">Network Uptime</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS STRIP -->
+  <div class="how-strip">
+    <div class="container">
+      <div class="how-steps">
+        <div class="how-step"><div class="how-step-num">1</div><div class="how-step-label">Register Drug</div><div class="how-step-desc">Manufacturer logs drug on chain</div></div>
+        <div class="how-step"><div class="how-step-num">2</div><div class="how-step-label">Assign Hash</div><div class="how-step-desc">Unique blockchain ID generated</div></div>
+        <div class="how-step"><div class="how-step-num">3</div><div class="how-step-label">Distribute</div><div class="how-step-desc">Wholesale → Retail tracked</div></div>
+        <div class="how-step"><div class="how-step-num">4</div><div class="how-step-label">Verify</div><div class="how-step-desc">Scan QR or enter code to verify</div></div>
+        <div class="how-step"><div class="how-step-num">5</div><div class="how-step-label">Dispense</div><div class="how-step-desc">Patient receives genuine drug</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRUG CATEGORIES -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center mb-32">
+        <div class="section-label">Drug Database</div>
+        <h2 class="section-title">Browse by Category</h2>
+        <p class="section-sub" style="margin: 0 auto;">Search our comprehensive database of verified pharmaceutical products organized by therapeutic category.</p>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card card-hover" onclick="showPage('drugs')"><div class="cat-icon" style="background:#e8f0fe;">💊</div><div><div class="cat-name">Antibiotics</div><div class="cat-count">2,841 drugs registered</div></div></div>
+        <div class="cat-card card-hover" onclick="showPage('drugs')"><div class="cat-icon" style="background:#dcfce7;">🩺</div><div><div class="cat-name">Analgesics</div><div class="cat-count">1,924 drugs registered</div></div></div>
+        <div class="cat-card card-hover" onclick="showPage('drugs')"><div class="cat-icon" style="background:#fef3c7;">🧬</div><div><div class="cat-name">Antimalarials</div><div class="cat-count">834 drugs registered</div></div></div>
+        <div class="cat-card card-hover" onclick="showPage('drugs')"><div class="cat-icon" style="background:#e6f8f7;">❤️</div><div><div class="cat-name">Cardiovascular</div><div class="cat-count">1,102 drugs registered</div></div></div>
+        <div class="cat-card card-hover" onclick="showPage('drugs')"><div class="cat-icon" style="background:#fee2e2;">🩸</div><div><div class="cat-name">Diabetes & Endocrine</div><div class="cat-count">667 drugs registered</div></div></div>
+        <div class="cat-card card-hover" onclick="showPage('drugs')"><div class="cat-icon" style="background:#ede9fe;">🧠</div><div><div class="cat-name">Neurological</div><div class="cat-count">509 drugs registered</div></div></div>
+        <div class="cat-card card-hover" onclick="showPage('drugs')"><div class="cat-icon" style="background:#fce7f3;">🫁</div><div><div class="cat-name">Respiratory</div><div class="cat-count">441 drugs registered</div></div></div>
+        <div class="cat-card card-hover" onclick="showPage('drugs')"><div class="cat-icon" style="background:#f0fdf4;">🦠</div><div><div class="cat-name">Antivirals / HIV</div><div class="cat-count">392 drugs registered</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="section" style="background:var(--c-navy); color:#fff;">
+    <div class="container">
+      <div class="text-center mb-32">
+        <div class="section-label" style="background:rgba(14,165,160,0.2);color:#5eead4;">Platform Features</div>
+        <h2 style="color:#fff;">Everything the supply chain needs</h2>
+        <p style="color:rgba(255,255,255,0.6);max-width:560px;margin:12px auto 0;">Built for manufacturers, distributors, retailers, regulators and healthcare professionals.</p>
+      </div>
+      <div class="grid-3" style="gap:24px;">
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-lg);padding:28px;">
+          <div style="font-size:36px;margin-bottom:16px;">⛓️</div>
+          <h3 style="color:#fff;margin-bottom:10px;">Immutable Blockchain Ledger</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.9rem;">Every drug registration, transfer, and verification is permanently stored on a tamper-proof distributed ledger.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-lg);padding:28px;">
+          <div style="font-size:36px;margin-bottom:16px;">🗺️</div>
+          <h3 style="color:#fff;margin-bottom:10px;">Real-Time GPS Tracking</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.9rem;">Monitor active drug shipments across the entire supply chain from manufacturer warehouse to retail shelf.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-lg);padding:28px;">
+          <div style="font-size:36px;margin-bottom:16px;">✅</div>
+          <h3 style="color:#fff;margin-bottom:10px;">Instant Drug Verification</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.9rem;">Scan a QR code or enter a NAFDAC number to instantly verify drug authenticity against the blockchain.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-lg);padding:28px;">
+          <div style="font-size:36px;margin-bottom:16px;">🔔</div>
+          <h3 style="color:#fff;margin-bottom:10px;">Counterfeit Alerts</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.9rem;">Automated hash-mismatch detection instantly flags counterfeit or tampered drugs and notifies all stakeholders.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-lg);padding:28px;">
+          <div style="font-size:36px;margin-bottom:16px;">📦</div>
+          <h3 style="color:#fff;margin-bottom:10px;">Wholesale & Retail Distribution</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.9rem;">Manage bulk orders, track dispatch from wholesalers to pharmacies, and monitor retail inventory in real time.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-lg);padding:28px;">
+          <div style="font-size:36px;margin-bottom:16px;">👥</div>
+          <h3 style="color:#fff;margin-bottom:10px;">Role-Based Access Control</h3>
+          <p style="color:rgba(255,255,255,0.55);font-size:0.9rem;">Manufacturer, distributor, retailer, hospital, and regulator accounts each have tailored dashboards and permissions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK VERIFY STRIP -->
+  <section class="section-sm" style="background:linear-gradient(90deg, var(--c-teal) 0%, #0891b2 100%);">
+    <div class="container">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;">
+        <div>
+          <h2 style="color:#fff;font-size:1.7rem;">Is your drug genuine?</h2>
+          <p style="color:rgba(255,255,255,0.8);">Verify any drug in seconds using the blockchain verification tool.</p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn btn-outline-white btn-lg" onclick="showPage('verify')">🔍 Verify Now</button>
+          <button class="btn btn-lg" style="background:#fff;color:var(--c-teal);" onclick="showPage('drugs')">Browse Database</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page-home -->
+
+
+<!-- =========================================================
+     ██ PAGE: DRUG DATABASE / BROWSE
+     ========================================================= -->
+<div class="page-section" id="page-drugs">
+  <div style="background:var(--c-navy);padding:32px 0 24px;">
+    <div class="container">
+      <div class="breadcrumb" style="color:rgba(255,255,255,0.5);"><a href="#" style="color:rgba(255,255,255,0.7);" onclick="showPage('home')">Home</a><span>›</span>Drug Database</div>
+      <h1 style="color:#fff;margin-bottom:12px;">Drug Database</h1>
+      <p style="color:rgba(255,255,255,0.65);">Blockchain-verified pharmaceutical products registered on the PharmChain network</p>
+      <div style="margin-top:20px;display:flex;gap:10px;">
+        <input type="text" class="form-control" placeholder="Search drug name, active ingredient, manufacturer, batch..." style="max-width:500px;" id="dbSearch" oninput="filterDrugTable(this.value)"/>
+        <select class="form-control" style="width:180px;" onchange="filterByCategory(this.value)">
+          <option value="">All Categories</option>
+          <option>Antibiotics</option><option>Analgesics</option><option>Antimalarials</option>
+          <option>Cardiovascular</option><option>Diabetes</option><option>Antivirals</option>
+        </select>
+        <button class="btn btn-teal">Filter</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:32px;padding-bottom:60px;">
+    <!-- A-Z BAR -->
+    <div class="az-bar" id="azBar"></div>
+
+    <div style="display:grid;grid-template-columns:240px 1fr;gap:28px;">
+      <!-- Sidebar filters -->
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Filters</div><button class="btn btn-ghost btn-sm" onclick="clearFilters()">Clear</button></div>
+          <div class="card-body" style="padding:16px;display:flex;flex-direction:column;gap:18px;">
+            <div>
+              <div class="form-label mb-8">Dosage Form</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox"/> Tablet</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox"/> Capsule</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox"/> Syrup</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox"/> Injection</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox"/> Cream</label>
+              </div>
+            </div>
+            <hr class="divider" style="margin:0;"/>
+            <div>
+              <div class="form-label mb-8">Verification Status</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox" checked/> ✅ Verified</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox"/> ⚠️ Under Review</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox"/> 🔴 Recalled</label>
+              </div>
+            </div>
+            <hr class="divider" style="margin:0;"/>
+            <div>
+              <div class="form-label mb-8">Prescription Required</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox"/> Prescription Only</label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;"><input type="checkbox"/> OTC (Over the Counter)</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card mt-16" style="background:var(--c-blue);border:none;">
+          <div class="card-body" style="text-align:center;padding:20px;">
+            <div style="font-size:28px;margin-bottom:8px;">📋</div>
+            <div style="font-family:var(--ff-head);font-size:0.95rem;color:#fff;font-weight:700;margin-bottom:6px;">Register a New Drug</div>
+            <div style="font-size:0.8rem;color:rgba(255,255,255,0.7);margin-bottom:14px;">Manufacturers: list your products on the blockchain</div>
+            <button class="btn btn-outline-white btn-sm w-full" onclick="showPage('dashboard')">Register Drug →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drug table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Registered Drugs <span style="color:var(--c-muted);font-size:0.82rem;font-weight:400;" id="drugCount">— 14,827 results</span></div>
+          <div style="display:flex;gap:8px;">
+            <span class="badge badge-teal">✓ Blockchain Verified</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="drugTable">
+            <thead>
+              <tr><th>Drug Name</th><th>NAFDAC Code</th><th>Form / Strength</th><th>Category</th><th>Manufacturer</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody id="drugTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-drugs -->
+
+
+<!-- =========================================================
+     ██ PAGE: DRUG DETAIL
+     ========================================================= -->
+<div class="page-section" id="page-drug-detail">
+  <div class="drug-hero">
+    <div class="container">
+      <div class="breadcrumb" style="color:rgba(255,255,255,0.5);"><a href="#" style="color:rgba(255,255,255,0.7);" onclick="showPage('home')">Home</a><span>›</span><a href="#" style="color:rgba(255,255,255,0.7);" onclick="showPage('drugs')">Drugs</a><span>›</span><span id="detailBreadcrumb">Amoxicillin</span></div>
+      <h1 id="detailDrugName">Amoxicillin 500mg Capsule</h1>
+      <div class="drug-hero-meta">
+        <span class="badge badge-green">✓ BLOCKCHAIN VERIFIED</span>
+        <span class="badge" style="background:rgba(255,255,255,0.15);color:#fff;">💊 Antibiotic</span>
+        <span class="badge" style="background:rgba(255,255,255,0.15);color:#fff;">📋 Prescription Required</span>
+        <span class="badge" style="background:rgba(255,255,255,0.15);color:#fff;">NAFDAC: A7-2841</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="drug-layout">
+      <!-- Main content -->
+      <div>
+        <div class="drug-tabs">
+          <div class="drug-tab active" onclick="switchDrugTab('overview',this)">Overview</div>
+          <div class="drug-tab" onclick="switchDrugTab('dosage',this)">Dosage</div>
+          <div class="drug-tab" onclick="switchDrugTab('sideeffects',this)">Side Effects</div>
+          <div class="drug-tab" onclick="switchDrugTab('interactions',this)">Interactions</div>
+          <div class="drug-tab" onclick="switchDrugTab('blockchain',this)">⛓ Blockchain Record</div>
+          <div class="drug-tab" onclick="switchDrugTab('supplychain',this)">🗺 Supply Chain</div>
+        </div>
+
+        <!-- OVERVIEW TAB -->
+        <div class="drug-tab-pane active" id="dtab-overview">
+          <div class="warning-box red">
+            <div class="warning-icon">⚠️</div>
+            <div><div class="warning-title">Prescription Drug</div><div class="warning-text">This medication requires a valid prescription. Do not use without consulting a qualified healthcare professional.</div></div>
+          </div>
+          <div class="drug-section-heading">What is Amoxicillin?</div>
+          <p style="color:var(--c-sub);font-size:0.95rem;line-height:1.8;margin-bottom:14px;">Amoxicillin is a broad-spectrum penicillin-type antibiotic used to treat bacterial infections including ear, nose, throat, urinary tract, and skin infections. It works by stopping bacterial cell wall synthesis, leading to bacterial cell death.</p>
+          <p style="color:var(--c-sub);font-size:0.95rem;line-height:1.8;">Each capsule contains 500mg of Amoxicillin trihydrate as the active ingredient, with microcrystalline cellulose, sodium starch glycolate, and magnesium stearate as excipients.</p>
+
+          <div class="drug-section-heading">Indications (Approved Uses)</div>
+          <div class="tags">
+            <span class="tag">Bacterial Infections</span><span class="tag">Pneumonia</span><span class="tag">Ear Infections (Otitis Media)</span>
+            <span class="tag">Strep Throat</span><span class="tag">Urinary Tract Infections</span><span class="tag">Skin Infections</span>
+            <span class="tag">H. Pylori (with other agents)</span>
+          </div>
+
+          <div class="drug-section-heading">Contraindications</div>
+          <div class="warning-box amber">
+            <div class="warning-icon">🚫</div>
+            <div><div class="warning-title">Do Not Use If:</div><div class="warning-text">You have a known allergy to penicillins or cephalosporins. Use with caution in patients with renal impairment or history of allergic reactions.</div></div>
+          </div>
+
+          <div class="drug-section-heading">Storage Conditions</div>
+          <div class="highlight-box">
+            🌡️ &nbsp; Store below <strong>30°C</strong> in a cool, dry place. Keep away from moisture and direct sunlight. Keep out of reach of children. Do not use after expiry date.
+          </div>
+        </div>
+
+        <!-- DOSAGE TAB -->
+        <div class="drug-tab-pane" id="dtab-dosage">
+          <div class="drug-section-heading">Recommended Dosage</div>
+          <table class="data-table">
+            <thead><tr><th>Indication</th><th>Adult Dose</th><th>Pediatric Dose</th><th>Frequency</th><th>Duration</th></tr></thead>
+            <tbody>
+              <tr><td>Mild to moderate infections</td><td>250–500mg</td><td>25mg/kg/day</td><td>Every 8 hrs</td><td>7–10 days</td></tr>
+              <tr><td>Severe infections / pneumonia</td><td>500–875mg</td><td>40–45mg/kg/day</td><td>Every 12 hrs</td><td>10–14 days</td></tr>
+              <tr><td>H. Pylori eradication</td><td>1,000mg</td><td>Not recommended</td><td>Twice daily</td><td>14 days</td></tr>
+              <tr><td>Otitis media (ear)</td><td>500mg</td><td>80–90mg/kg/day</td><td>Every 8 hrs</td><td>5–7 days</td></tr>
+            </tbody>
+          </table>
+          <div class="warning-box blue mt-24">
+            <div class="warning-icon">ℹ️</div>
+            <div><div class="warning-title">Renal Dose Adjustment Required</div><div class="warning-text">Reduce dose in patients with CrCl &lt; 30 mL/min. Haemodialysis patients should receive supplemental doses after sessions.</div></div>
+          </div>
+        </div>
+
+        <!-- SIDE EFFECTS TAB -->
+        <div class="drug-tab-pane" id="dtab-sideeffects">
+          <div class="drug-section-heading">Common Side Effects (≥ 1%)</div>
+          <div class="grid-3" style="gap:14px;margin-bottom:24px;">
+            <div class="highlight-box" style="text-align:center;"><div style="font-size:22px;margin-bottom:6px;">🤢</div><div style="font-size:0.85rem;font-weight:600;">Nausea & Vomiting</div><div style="font-size:0.75rem;color:var(--c-muted);">~10% of patients</div></div>
+            <div class="highlight-box" style="text-align:center;"><div style="font-size:22px;margin-bottom:6px;">💊</div><div style="font-size:0.85rem;font-weight:600;">Diarrhoea</div><div style="font-size:0.75rem;color:var(--c-muted);">~9% of patients</div></div>
+            <div class="highlight-box" style="text-align:center;"><div style="font-size:22px;margin-bottom:6px;">😖</div><div style="font-size:0.85rem;font-weight:600;">Headache</div><div style="font-size:0.75rem;color:var(--c-muted);">~6% of patients</div></div>
+          </div>
+          <div class="drug-section-heading">Serious Adverse Reactions (Rare)</div>
+          <div class="warning-box red"><div class="warning-icon">🚨</div><div><div class="warning-title">Anaphylaxis — Seek Emergency Care Immediately</div><div class="warning-text">Symptoms: hives, swelling of face/tongue/throat, difficulty breathing. Stop taking immediately and call emergency services.</div></div></div>
+          <div class="warning-box amber"><div class="warning-icon">⚠️</div><div><div class="warning-title">C. difficile-Associated Diarrhoea (CDAD)</div><div class="warning-text">May range from mild diarrhoea to fatal colitis. Evaluate if diarrhoea persists after treatment completion.</div></div></div>
+        </div>
+
+        <!-- INTERACTIONS TAB -->
+        <div class="drug-tab-pane" id="dtab-interactions">
+          <div class="drug-section-heading">Drug Interactions</div>
+          <table class="data-table">
+            <thead><tr><th>Interacting Drug</th><th>Severity</th><th>Effect</th><th>Recommendation</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Warfarin</strong></td><td><span class="badge badge-red">MAJOR</span></td><td>Increased anticoagulant effect; bleeding risk</td><td>Monitor INR closely; adjust warfarin dose</td></tr>
+              <tr><td><strong>Methotrexate</strong></td><td><span class="badge badge-red">MAJOR</span></td><td>Reduces MTX clearance; toxicity risk</td><td>Avoid combination or monitor closely</td></tr>
+              <tr><td><strong>Oral Contraceptives</strong></td><td><span class="badge badge-amber">MODERATE</span></td><td>May reduce contraceptive effectiveness</td><td>Use additional contraception methods</td></tr>
+              <tr><td><strong>Probenecid</strong></td><td><span class="badge badge-amber">MODERATE</span></td><td>Increases amoxicillin serum levels</td><td>May be used therapeutically; monitor</td></tr>
+              <tr><td><strong>Allopurinol</strong></td><td><span class="badge badge-amber">MODERATE</span></td><td>Increased risk of skin rash</td><td>Monitor for rash; avoid if possible</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- BLOCKCHAIN RECORD TAB -->
+        <div class="drug-tab-pane" id="dtab-blockchain">
+          <div class="drug-section-heading">Blockchain Identification</div>
+          <div class="grid-2" style="gap:20px;margin-bottom:24px;">
+            <div>
+              <table class="info-table">
+                <tr><td>Registration Block</td><td class="font-mono color-blue">#2,841,029</td></tr>
+                <tr><td>Block Timestamp</td><td>Jan 15, 2025 — 09:14:32 UTC</td></tr>
+                <tr><td>Transaction Hash</td><td class="font-mono" style="font-size:0.7rem;word-break:break-all;color:var(--c-blue);">0x3f8a1b2c9d4e7f6a5b8c3d2e1f9a8b7c6e5d4c3b</td></tr>
+                <tr><td>Drug Hash (SHA-256)</td><td class="font-mono" style="font-size:0.7rem;word-break:break-all;color:var(--c-green);">a3f2b1c8d9e4f7a6b5c4d3e2f1a9b8c7</td></tr>
+                <tr><td>Smart Contract</td><td class="font-mono" style="font-size:0.7rem;">0x49d5...f7a2</td></tr>
+                <tr><td>Network</td><td>PharmChain MainNet</td></tr>
+                <tr><td>Confirmations</td><td class="color-green font-bold">1,006,362 ✓</td></tr>
+              </table>
+            </div>
+            <div class="chain-verify-box">
+              <div class="chain-verified">✅ BLOCKCHAIN VERIFIED</div>
+              <div style="font-size:0.8rem;color:rgba(255,255,255,0.7);margin-bottom:14px;">This drug record has been verified against the PharmChain distributed ledger. The data is immutable and tamper-proof.</div>
+              <div style="font-family:var(--ff-mono);font-size:0.7rem;color:rgba(255,255,255,0.4);margin-bottom:4px;">DRUG HASH (SHA-256)</div>
+              <div class="chain-hash">a3f2b1c8d9e4f7a6b5c4d3e2f1a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2</div>
+              <div style="margin-top:16px;">
+                <button class="btn btn-outline-white btn-sm" onclick="showPage('verify')">Re-verify Now →</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="drug-section-heading">Transaction History</div>
+          <table class="data-table">
+            <thead><tr><th>Block</th><th>Event</th><th>Actor</th><th>Date</th><th>Hash</th></tr></thead>
+            <tbody>
+              <tr><td class="color-blue font-mono">#2,841,029</td><td><span class="badge badge-blue">REGISTER</span></td><td>PharmaCorp Ltd</td><td>Jan 15, 2025</td><td class="font-mono text-xs truncate" style="max-width:120px;">0x3f8a1b2c...</td></tr>
+              <tr><td class="color-blue font-mono">#2,843,182</td><td><span class="badge badge-teal">TRANSFER</span></td><td>HealthDist Nigeria</td><td>Jan 18, 2025</td><td class="font-mono text-xs truncate" style="max-width:120px;">0x7d2e9f1a...</td></tr>
+              <tr><td class="color-blue font-mono">#2,846,901</td><td><span class="badge badge-teal">TRANSFER</span></td><td>City Pharmacy</td><td>Feb 14, 2025</td><td class="font-mono text-xs truncate" style="max-width:120px;">0x1a5c8e3b...</td></tr>
+              <tr><td class="color-blue font-mono">#2,847,391</td><td><span class="badge badge-green">VERIFY</span></td><td>Patient Scan</td><td>Feb 16, 2025</td><td class="font-mono text-xs truncate" style="max-width:120px;">0x9b4d7f2e...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SUPPLY CHAIN TAB -->
+        <div class="drug-tab-pane" id="dtab-supplychain">
+          <div class="drug-section-heading">Complete Supply Chain Journey</div>
+          <div class="journey-steps">
+            <div class="journey-step">
+              <div class="journey-left"><div class="journey-dot done"></div><div class="journey-line"></div></div>
+              <div class="journey-content"><div class="journey-title">🏭 Manufactured — PharmaCorp Ltd, Lagos</div><div class="journey-meta">Jan 15, 2025 09:14 UTC · Block #2,841,029 · Batch BTH-2025-0441</div><div class="journey-detail">10,000 units produced. NAPDAC quality inspection passed. Drug registered on blockchain.</div></div>
+            </div>
+            <div class="journey-step">
+              <div class="journey-left"><div class="journey-dot done"></div><div class="journey-line"></div></div>
+              <div class="journey-content"><div class="journey-title">🔬 Quality Control Approved</div><div class="journey-meta">Jan 16, 2025 · Lab Cert: QC-2025-01441</div><div class="journey-detail">Full batch testing completed. Potency, sterility, and shelf-life verified. Certificate of Analysis uploaded.</div></div>
+            </div>
+            <div class="journey-step">
+              <div class="journey-left"><div class="journey-dot done"></div><div class="journey-line"></div></div>
+              <div class="journey-content"><div class="journey-title">📦 Dispatched to Wholesaler — HealthDist Nigeria Ltd</div><div class="journey-meta">Jan 18, 2025 · Shipment SHP-48821 · 10,000 units</div><div class="journey-detail">Transferred to HealthDist Nigeria warehouse, Ikeja, Lagos. Cold chain intact. Temperature log attached.</div></div>
+            </div>
+            <div class="journey-step">
+              <div class="journey-left"><div class="journey-dot done"></div><div class="journey-line"></div></div>
+              <div class="journey-content"><div class="journey-title">🏪 Delivered to Retailer — City Pharmacy, Lagos Island</div><div class="journey-meta">Feb 14, 2025 · 2,400 units dispatched</div><div class="journey-detail">Retail delivery confirmed. Pharmacist signed for receipt. QR labels scanned at point of entry.</div></div>
+            </div>
+            <div class="journey-step">
+              <div class="journey-left"><div class="journey-dot current"></div></div>
+              <div class="journey-content"><div class="journey-title" style="color:var(--c-teal);">✅ Patient Verification — Current Status</div><div class="journey-meta">Feb 16, 2025 · Verified by patient scan</div><div class="journey-detail">Drug verified as authentic at point of dispensing. This record is immutable.</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /drug main -->
+
+      <!-- SIDEBAR -->
+      <div class="drug-sidebar">
+        <!-- Quick info card -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Quick Drug Info</div></div>
+          <div class="card-body" style="padding:16px;">
+            <table class="info-table">
+              <tr><td>Generic Name</td><td>Amoxicillin</td></tr>
+              <tr><td>Brand Names</td><td>Amoxil, Trimox</td></tr>
+              <tr><td>Drug Class</td><td>Penicillin Antibiotic</td></tr>
+              <tr><td>ATC Code</td><td class="font-mono">J01CA04</td></tr>
+              <tr><td>NAFDAC No.</td><td class="font-mono color-blue">A7-2841</td></tr>
+              <tr><td>Strength</td><td>500mg</td></tr>
+              <tr><td>Dosage Form</td><td>Capsule</td></tr>
+              <tr><td>Manufacturer</td><td>PharmaCorp Ltd</td></tr>
+              <tr><td>Country</td><td>Nigeria</td></tr>
+              <tr><td>Mfr. Date</td><td>Jan 2025</td></tr>
+              <tr><td>Expiry Date</td><td class="color-green">Jan 2027</td></tr>
+              <tr><td>Batch No.</td><td class="font-mono">BTH-2025-0441</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Authenticity score -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Authenticity Score</div></div>
+          <div class="card-body" style="display:flex;align-items:center;gap:14px;">
+            <div class="score-ring excellent" style="background:none;border:6px solid var(--c-green);color:var(--c-green);">9.8</div>
+            <div>
+              <div style="font-weight:700;color:var(--c-navy);">Excellent — Verified</div>
+              <div style="font-size:0.8rem;color:var(--c-muted);margin-top:3px;">Blockchain hash matches original registration. No anomalies detected in chain of custody.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verify button -->
+        <div class="card" style="background: linear-gradient(135deg,var(--c-teal),#0891b2);border:none;">
+          <div class="card-body" style="text-align:center;">
+            <div style="font-size:32px;margin-bottom:8px;">🔍</div>
+            <div style="font-family:var(--ff-head);font-weight:700;color:#fff;margin-bottom:6px;">Verify This Drug</div>
+            <div style="font-size:0.8rem;color:rgba(255,255,255,0.75);margin-bottom:14px;">Confirm authenticity on the blockchain right now</div>
+            <button class="btn btn-outline-white w-full" onclick="showPage('verify')">Verify Now →</button>
+          </div>
+        </div>
+
+        <!-- Related drugs -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Related Drugs</div></div>
+          <div class="card-body" style="padding:12px;display:flex;flex-direction:column;gap:6px;">
+            <div class="nav-dd-item" onclick="drugDetail('amoxicillin')" style="cursor:pointer;"><div class="nav-dd-icon" style="background:var(--c-blue-lt);">💊</div><div><div class="nav-dd-name">Amoxicillin+Clavulanate</div><div class="nav-dd-desc">NAFDAC: A7-2842 · Verified</div></div></div>
+            <div class="nav-dd-item" style="cursor:pointer;"><div class="nav-dd-icon" style="background:var(--c-teal-lt);">💊</div><div><div class="nav-dd-name">Ciprofloxacin 500mg</div><div class="nav-dd-desc">NAFDAC: C8-1021 · Verified</div></div></div>
+            <div class="nav-dd-item" style="cursor:pointer;"><div class="nav-dd-icon" style="background:var(--c-green-lt);">💊</div><div><div class="nav-dd-name">Azithromycin 250mg</div><div class="nav-dd-desc">NAFDAC: A4-3311 · Verified</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-drug-detail -->
+
+
+<!-- =========================================================
+     ██ PAGE: VERIFY DRUG
+     ========================================================= -->
+<div class="page-section" id="page-verify">
+  <div style="background:linear-gradient(135deg,var(--c-navy),#0f3069);padding:48px 0 32px;">
+    <div class="container-sm text-center">
+      <div class="section-label" style="background:rgba(14,165,160,0.2);color:#5eead4;">Blockchain Verification</div>
+      <h1 style="color:#fff;margin-bottom:12px;">Verify Drug Authenticity</h1>
+      <p style="color:rgba(255,255,255,0.65);">Enter a drug code, batch number, or scan a QR code to instantly verify against the PharmChain blockchain — the only way to guarantee a drug is genuine.</p>
+    </div>
+  </div>
+  <div class="container-sm" style="padding-top:36px;padding-bottom:64px;">
+    <div class="card" style="margin-bottom:24px;">
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:22px;" id="verifyTypeSel">
+          <div class="role-opt selected" onclick="selVerifyType(this,'drug')"><div class="role-opt-icon">💊</div><div class="role-opt-name">Drug Code</div></div>
+          <div class="role-opt" onclick="selVerifyType(this,'batch')"><div class="role-opt-icon">📦</div><div class="role-opt-name">Batch Number</div></div>
+          <div class="role-opt" onclick="selVerifyType(this,'hash')"><div class="role-opt-icon">⛓️</div><div class="role-opt-name">Blockchain Hash</div></div>
+        </div>
+        <div class="form-group mb-16">
+          <label class="form-label" id="verifyInputLabel">NAFDAC Drug Code</label>
+          <div style="display:flex;gap:10px;">
+            <input type="text" class="form-control" placeholder="e.g. A7-2841 or A7-0000 (for counterfeit demo)" id="verifyMainInput" style="font-size:1rem;"/>
+            <button class="btn btn-teal" style="white-space:nowrap;" onclick="runVerify()">🔍 Verify</button>
+          </div>
+          <div class="form-hint">Tip: enter A7-0000 to simulate a counterfeit drug detection</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+          <button class="btn btn-outline btn-sm">📷 Scan QR Code</button>
+          <button class="btn btn-ghost btn-sm">📂 Upload Label Image</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verify Result -->
+    <div id="verifyResult" style="display:none;"></div>
+
+    <!-- How verification works -->
+    <div class="grid-3 mt-32" style="gap:16px;">
+      <div class="card text-center card-hover"><div class="card-body"><div style="font-size:32px;margin-bottom:10px;">1️⃣</div><h4>Enter Code</h4><p style="font-size:0.85rem;">Type or scan the drug's NAFDAC number, batch, or blockchain hash.</p></div></div>
+      <div class="card text-center card-hover"><div class="card-body"><div style="font-size:32px;margin-bottom:10px;">2️⃣</div><h4>Query Blockchain</h4><p style="font-size:0.85rem;">PharmChain queries all distributed nodes for a matching record.</p></div></div>
+      <div class="card text-center card-hover"><div class="card-body"><div style="font-size:32px;margin-bottom:10px;">3️⃣</div><h4>Instant Result</h4><p style="font-size:0.85rem;">Receive VERIFIED ✅ or COUNTERFEIT ❌ with full drug profile and chain of custody.</p></div></div>
+    </div>
+  </div>
+</div><!-- /page-verify -->
+
+
+<!-- =========================================================
+     ██ PAGE: TRACKING
+     ========================================================= -->
+<div class="page-section" id="page-tracking">
+  <div style="background:var(--c-navy);padding:36px 0 24px;">
+    <div class="container">
+      <h1 style="color:#fff;margin-bottom:8px;">Live Drug Tracking</h1>
+      <p style="color:rgba(255,255,255,0.6);">Real-time GPS tracking across the entire pharmaceutical supply chain</p>
+    </div>
+  </div>
+  <div class="container" style="padding-top:32px;padding-bottom:60px;">
+    <div class="track-layout">
+      <div>
+        <div class="card mb-24">
+          <div class="card-body">
+            <div class="form-label mb-8">Track a Shipment or Drug</div>
+            <div style="display:flex;gap:10px;margin-bottom:14px;">
+              <input type="text" class="form-control" placeholder="Enter Drug Code, Batch No., or Shipment ID" id="trackInput"/>
+              <button class="btn btn-primary" onclick="doTrack()">Track →</button>
+            </div>
+            <div id="trackTimeline" style="display:none;margin-top:16px;"></div>
+          </div>
+        </div>
+        <!-- Live map -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Live Shipment Map</div><span class="badge badge-green">● 492 Active</span></div>
+          <div class="card-body" style="padding:0;">
+            <div class="track-map-wrap" style="height:300px;border-radius:0 0 var(--r-lg) var(--r-lg);">
+              <div class="track-map-bg"></div>
+              <div class="pulse-dot" style="left:28%;top:42%;"></div>
+              <div class="pulse-dot" style="left:54%;top:35%;animation-delay:0.7s;background:var(--c-teal);"></div>
+              <div class="pulse-dot" style="left:70%;top:60%;animation-delay:1.3s;"></div>
+              <div class="pulse-dot" style="left:40%;top:68%;animation-delay:0.4s;background:var(--c-amber);"></div>
+              <div class="pulse-dot" style="left:82%;top:28%;animation-delay:1s;"></div>
+              <div style="position:relative;z-index:1;text-align:center;">
+                <div style="font-size:48px;margin-bottom:8px;">🗺️</div>
+                <div style="font-weight:600;color:var(--c-navy);">Nigeria Drug Distribution Network</div>
+                <div style="font-size:0.82rem;color:var(--c-muted);">Animated dots indicate active GPS-tracked shipments</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Active shipments -->
+      <div>
+        <div class="card mb-20">
+          <div class="card-header"><div class="card-title">Active Shipments</div></div>
+          <div class="card-body" style="padding:0;">
+            <table class="data-table">
+              <thead><tr><th>ID</th><th>Drug</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td class="color-blue font-mono">SHP-48821</td><td>Amoxicillin 500mg</td><td><span class="badge badge-teal">In Transit</span></td></tr>
+                <tr><td class="color-blue font-mono">SHP-48822</td><td>Paracetamol 1g</td><td><span class="badge badge-teal">In Transit</span></td></tr>
+                <tr><td class="color-blue font-mono">SHP-48823</td><td>Ciprofloxacin 500mg</td><td><span class="badge badge-amber">Delayed</span></td></tr>
+                <tr><td class="color-blue font-mono">SHP-48824</td><td>Metronidazole 250mg</td><td><span class="badge badge-green">Delivered</span></td></tr>
+                <tr><td class="color-blue font-mono">SHP-48825</td><td>Ibuprofen 400mg</td><td><span class="badge badge-teal">In Transit</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="stat-card" style="margin-bottom:16px;"><div class="stat-bar-teal stat-card-bar"></div><div class="stat-label">Total Shipments Today</div><div class="stat-value">184</div><div class="stat-change text-muted">23 States covered</div><div class="stat-icon">🚚</div></div>
+        <div class="stat-card"><div class="stat-bar-amber stat-card-bar"></div><div class="stat-label">Flagged / Delayed</div><div class="stat-value" style="color:var(--c-amber);">23</div><div class="stat-change text-muted">Requires attention</div><div class="stat-icon">⚠️</div></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-tracking -->
+
+
+<!-- =========================================================
+     ██ PAGE: LOGIN
+     ========================================================= -->
+<div class="page-section" id="page-login">
+  <div class="auth-split">
+    <div class="auth-visual">
+      <div class="auth-visual-content">
+        <div class="auth-logo" style="margin-bottom:32px;"><div class="brand-mark">⛓</div><div style="font-family:var(--ff-head);font-size:1.3rem;font-weight:800;color:#fff;">Pharm<span style="color:#5eead4;">Chain</span></div></div>
+        <h2>Welcome back to PharmChain</h2>
+        <p>The leading blockchain drug verification and supply chain management platform.</p>
+        <div class="auth-visual-features">
+          <div class="auth-feature"><div class="auth-feature-icon">⛓️</div><div class="auth-feature-text"><strong>Immutable Records</strong><span>Every transaction permanently secured</span></div></div>
+          <div class="auth-feature"><div class="auth-feature-icon">🔍</div><div class="auth-feature-text"><strong>Real-Time Verification</strong><span>Instant drug authenticity checks</span></div></div>
+          <div class="auth-feature"><div class="auth-feature-icon">📊</div><div class="auth-feature-text"><strong>Full Analytics Dashboard</strong><span>Supply chain insights at a glance</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="auth-form-area">
+      <div class="auth-form-box">
+        <div style="margin-bottom:32px;">
+          <h2 style="margin-bottom:6px;">Sign in to your account</h2>
+          <p style="font-size:0.9rem;">Access your PharmChain dashboard</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-control" placeholder="you@organization.com" id="loginEmail"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" placeholder="••••••••" id="loginPass"/>
+            <div class="form-hint"><a href="#" style="color:var(--c-blue);">Forgot your password?</a></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;cursor:pointer;"><input type="checkbox"/> Remember me on this device</label>
+          <button class="btn btn-primary w-full" style="margin-top:4px;" onclick="doLogin()">Sign In to PharmChain →</button>
+        </div>
+        <div class="auth-divider"><span>or sign in with</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button class="btn btn-outline w-full btn-sm">🏛️ NAFDAC ID</button>
+          <button class="btn btn-outline w-full btn-sm">🏢 Organization SSO</button>
+        </div>
+        <div class="auth-switch">Don't have an account? <a href="#" onclick="showPage('register')">Create one free →</a></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-login -->
+
+
+<!-- =========================================================
+     ██ PAGE: REGISTER
+     ========================================================= -->
+<div class="page-section" id="page-register">
+  <div class="auth-split">
+    <div class="auth-visual">
+      <div class="auth-visual-content">
+        <div class="auth-logo" style="margin-bottom:32px;"><div class="brand-mark">⛓</div><div style="font-family:var(--ff-head);font-size:1.3rem;font-weight:800;color:#fff;">Pharm<span style="color:#5eead4;">Chain</span></div></div>
+        <h2>Join the PharmChain Network</h2>
+        <p>Register as a manufacturer, distributor, retailer, hospital, or regulatory authority and get access to the blockchain drug verification platform.</p>
+        <div class="auth-visual-features">
+          <div class="auth-feature"><div class="auth-feature-icon">🏭</div><div class="auth-feature-text"><strong>Manufacturers</strong><span>Register drugs, manage batches</span></div></div>
+          <div class="auth-feature"><div class="auth-feature-icon">🚚</div><div class="auth-feature-text"><strong>Distributors</strong><span>Track wholesale & logistics</span></div></div>
+          <div class="auth-feature"><div class="auth-feature-icon">🏪</div><div class="auth-feature-text"><strong>Retailers / Pharmacies</strong><span>Receive, verify, dispense drugs</span></div></div>
+          <div class="auth-feature"><div class="auth-feature-icon">🔍</div><div class="auth-feature-text"><strong>Regulators</strong><span>Full audit & compliance tools</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="auth-form-area" style="overflow-y:auto;">
+      <div class="auth-form-box" style="max-width:500px;">
+        <div style="margin-bottom:24px;"><h2 style="margin-bottom:6px;">Create your account</h2><p style="font-size:0.9rem;">All fields marked * are required</p></div>
+
+        <!-- Stepper -->
+        <div class="stepper mb-24">
+          <div class="stepper-step"><div class="stepper-circle active" id="s1">1</div><div class="stepper-label">Role</div></div>
+          <div class="stepper-line"></div>
+          <div class="stepper-step"><div class="stepper-circle" id="s2">2</div><div class="stepper-label">Details</div></div>
+          <div class="stepper-line"></div>
+          <div class="stepper-step"><div class="stepper-circle" id="s3">3</div><div class="stepper-label">Security</div></div>
+        </div>
+
+        <!-- Step 1: Role -->
+        <div id="regStep1">
+          <div class="form-label mb-8">Select Your Role *</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+            <div class="role-opt selected" onclick="selRegRole(this)"><div class="role-opt-icon">🏭</div><div class="role-opt-name">Manufacturer</div></div>
+            <div class="role-opt" onclick="selRegRole(this)"><div class="role-opt-icon">🚚</div><div class="role-opt-name">Distributor</div></div>
+            <div class="role-opt" onclick="selRegRole(this)"><div class="role-opt-icon">🏪</div><div class="role-opt-name">Retailer / Pharmacy</div></div>
+            <div class="role-opt" onclick="selRegRole(this)"><div class="role-opt-icon">🏥</div><div class="role-opt-name">Hospital / Clinic</div></div>
+            <div class="role-opt" onclick="selRegRole(this)"><div class="role-opt-icon">🔍</div><div class="role-opt-name">Regulator / NAFDAC</div></div>
+            <div class="role-opt" onclick="selRegRole(this)"><div class="role-opt-icon">👨‍⚕️</div><div class="role-opt-name">Healthcare Professional</div></div>
+          </div>
+          <button class="btn btn-primary w-full" onclick="nextRegStep(2)">Continue → Personal Details</button>
+        </div>
+
+        <!-- Step 2: Details -->
+        <div id="regStep2" style="display:none;">
+          <div class="form-grid" style="margin-bottom:16px;">
+            <div class="form-group"><label class="form-label">First Name *</label><input type="text" class="form-control" placeholder="First name"/></div>
+            <div class="form-group"><label class="form-label">Last Name *</label><input type="text" class="form-control" placeholder="Last name"/></div>
+            <div class="form-group form-full"><label class="form-label">Organization / Company Name *</label><input type="text" class="form-control" placeholder="Your organization name"/></div>
+            <div class="form-group"><label class="form-label">License / Reg. Number *</label><input type="text" class="form-control" placeholder="PCN-XXXX or equivalent"/></div>
+            <div class="form-group"><label class="form-label">Email Address *</label><input type="email" class="form-control" placeholder="official@org.com"/></div>
+            <div class="form-group"><label class="form-label">Phone Number *</label><input type="tel" class="form-control" placeholder="+234 800 000 0000"/></div>
+            <div class="form-group"><label class="form-label">State *</label>
+              <select class="form-control"><option>Select state...</option><option>Lagos</option><option>Abuja FCT</option><option>Kano</option><option>Rivers</option><option>Ogun</option><option>Oyo</option><option>Enugu</option><option>Delta</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Country *</label><input type="text" class="form-control" value="Nigeria"/></div>
+            <div class="form-group form-full"><label class="form-label">Full Address *</label><input type="text" class="form-control" placeholder="Street, City, State"/></div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-ghost" onclick="nextRegStep(1)">← Back</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="nextRegStep(3)">Continue → Set Password</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Security -->
+        <div id="regStep3" style="display:none;">
+          <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:20px;">
+            <div class="form-group"><label class="form-label">Password *</label><input type="password" class="form-control" placeholder="Minimum 8 characters"/></div>
+            <div class="form-group"><label class="form-label">Confirm Password *</label><input type="password" class="form-control" placeholder="Repeat your password"/></div>
+            <div class="form-group"><label class="form-label">Two-Factor Authentication</label>
+              <select class="form-control"><option>SMS (Recommended)</option><option>Authenticator App</option><option>Email OTP</option></select>
+            </div>
+          </div>
+          <div class="warning-box blue" style="margin-bottom:16px;">
+            <div class="warning-icon">ℹ️</div>
+            <div><div class="warning-title">Account Verification Required</div><div class="warning-text">After registration, your account will be verified against your license number with the relevant regulatory authority (PCN / NAFDAC) before activation. This typically takes 24–48 hours.</div></div>
+          </div>
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.85rem;cursor:pointer;margin-bottom:16px;"><input type="checkbox" style="margin-top:3px;"/> I agree to the PharmChain <a href="#" style="color:var(--c-blue);">Terms of Service</a>, <a href="#" style="color:var(--c-blue);">Privacy Policy</a>, and confirm that all information provided is accurate and complete.</label>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-ghost" onclick="nextRegStep(2)">← Back</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="doRegister()">✅ Create My Account</button>
+          </div>
+        </div>
+
+        <div class="auth-switch">Already have an account? <a href="#" onclick="showPage('login')">Sign in →</a></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-register -->
+
+
+<!-- =========================================================
+     ██ PAGE: DASHBOARD
+     ========================================================= -->
+<div class="page-section" id="page-dashboard">
+  <div class="dash-wrap">
+    <!-- Sidebar -->
+    <div class="dash-sidebar">
+      <div style="padding:20px 16px;border-bottom:1px solid rgba(255,255,255,0.1);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="brand-mark" style="width:34px;height:34px;font-size:16px;">⛓</div>
+          <div><div style="font-family:var(--ff-head);font-size:0.95rem;font-weight:800;color:#fff;">PharmChain</div><div style="font-size:0.7rem;color:rgba(255,255,255,0.45);font-family:var(--ff-mono);">MANUFACTURER PORTAL</div></div>
+        </div>
+      </div>
+      <div class="dash-sidebar-section">Overview</div>
+      <div class="dash-nav-item active" onclick="dPage('dp-overview',this)"><span class="dash-nav-icon">📊</span>Dashboard</div>
+      <div class="dash-nav-item" onclick="dPage('dp-analytics',this)"><span class="dash-nav-icon">📈</span>Analytics</div>
+
+      <div class="dash-sidebar-section">Registry</div>
+      <div class="dash-nav-item" onclick="dPage('dp-drug-reg',this)"><span class="dash-nav-icon">💊</span>Drug Registration</div>
+      <div class="dash-nav-item" onclick="dPage('dp-user-reg',this)"><span class="dash-nav-icon">👤</span>User Management</div>
+      <div class="dash-nav-item" onclick="dPage('dp-distributor',this)"><span class="dash-nav-icon">🏭</span>Distributors</div>
+
+      <div class="dash-sidebar-section">Distribution</div>
+      <div class="dash-nav-item" onclick="dPage('dp-wholesale',this)"><span class="dash-nav-icon">📦</span>Wholesale Orders</div>
+      <div class="dash-nav-item" onclick="dPage('dp-retail',this)"><span class="dash-nav-icon">🏪</span>Retail Distribution</div>
+      <div class="dash-nav-item" onclick="showPage('tracking')"><span class="dash-nav-icon">🗺️</span>Live Tracking</div>
+
+      <div class="dash-sidebar-section">Tools</div>
+      <div class="dash-nav-item" onclick="showPage('verify')"><span class="dash-nav-icon">✅</span>Verify Drug</div>
+      <div class="dash-nav-item" onclick="dPage('dp-alerts',this)">
+        <span class="dash-nav-icon">🔔</span>Alerts
+        <span class="dash-badge">3</span>
+      </div>
+      <div class="dash-nav-item" onclick="dPage('dp-blockchain',this)"><span class="dash-nav-icon">⛓️</span>Blockchain Ledger</div>
+      <div class="dash-nav-item" onclick="dPage('dp-settings',this)"><span class="dash-nav-icon">⚙️</span>Settings</div>
+
+      <div style="margin-top:auto;padding:16px;border-top:1px solid rgba(255,255,255,0.1);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--c-blue),var(--c-teal));display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;">PC</div>
+          <div><div style="font-size:0.82rem;color:#fff;font-weight:600;">PharmaCorp Ltd</div><div style="font-size:0.7rem;color:rgba(255,255,255,0.45);">Manufacturer Account</div></div>
+        </div>
+        <button class="btn btn-ghost btn-sm w-full" style="color:rgba(255,255,255,0.5);margin-top:10px;" onclick="showPage('home')">← Back to Site</button>
+      </div>
+    </div>
+
+    <!-- Dash Content -->
+    <div class="dash-content">
+
+      <!-- DP: OVERVIEW -->
+      <div id="dp-overview" class="dash-sub active">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <div><h2 style="font-size:1.4rem;margin-bottom:4px;">Good morning, PharmaCorp 👋</h2><p style="font-size:0.85rem;color:var(--c-muted);">Monday, February 16, 2026 — PharmChain Mainnet is synced</p></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-outline btn-sm" onclick="dPage('dp-drug-reg',null)">+ Register Drug</button>
+            <button class="btn btn-primary btn-sm" onclick="showPage('verify')">✅ Verify Drug</button>
+          </div>
+        </div>
+
+        <div class="stat-cards">
+          <div class="stat-card"><div class="stat-card-bar stat-bar-blue"></div><div class="stat-icon">💊</div><div class="stat-label">Registered Drugs</div><div class="stat-value">342</div><div class="stat-change" style="color:var(--c-green);">↑ 14 this week</div></div>
+          <div class="stat-card"><div class="stat-card-bar stat-bar-green"></div><div class="stat-icon">✅</div><div class="stat-label">Verified Today</div><div class="stat-value">1,284</div><div class="stat-change" style="color:var(--c-green);">↑ 8.2% vs yesterday</div></div>
+          <div class="stat-card"><div class="stat-card-bar stat-bar-teal"></div><div class="stat-icon">🚚</div><div class="stat-label">Active Shipments</div><div class="stat-value">67</div><div class="stat-change text-muted">4 require attention</div></div>
+          <div class="stat-card"><div class="stat-card-bar stat-bar-amber"></div><div class="stat-icon">⚠️</div><div class="stat-label">Open Alerts</div><div class="stat-value" style="color:var(--c-amber);">3</div><div class="stat-change" style="color:var(--c-red);">2 critical</div></div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:24px;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent Blockchain Activity</div><span class="badge badge-green">● Live</span></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Block</th><th>Event</th><th>Drug</th><th>Status</th></tr></thead>
+                <tbody id="dashFeed"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Active Alerts</div><button class="btn btn-ghost btn-sm" onclick="dPage('dp-alerts',null)">View all</button></div>
+            <div class="card-body" style="padding:12px;display:flex;flex-direction:column;gap:10px;">
+              <div class="warning-box red" style="margin:0;"><div class="warning-icon">🚨</div><div><div class="warning-title">Counterfeit Detected — CIPRO-250</div><div class="warning-text">Hash mismatch in Lagos. Immediate action required.</div></div></div>
+              <div class="warning-box amber" style="margin:0;"><div class="warning-icon">⚠️</div><div><div class="warning-title">Expired Batch in Circulation — AMOX-034</div><div class="warning-text">Batch expired Jan 2025, still distributed in Abuja.</div></div></div>
+              <div class="warning-box blue" style="margin:0;"><div class="warning-icon">ℹ️</div><div><div class="warning-title">Cold Chain Breach — PARA-007</div><div class="warning-text">Temperature exceeded 30°C during transit to Kano.</div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blockchain chain explorer -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">⛓ Blockchain Explorer — Latest Blocks</div><button class="btn btn-ghost btn-sm" onclick="dPage('dp-blockchain',null)">Full Ledger →</button></div>
+          <div class="card-body" style="padding:16px;">
+            <div class="chain-blocks" id="chainBlocksWidget"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DP: DRUG REGISTRATION -->
+      <div id="dp-drug-reg" class="dash-sub" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+          <div><h2 style="font-size:1.4rem;margin-bottom:4px;">Drug Registration</h2><p style="font-size:0.85rem;color:var(--c-muted);">Register pharmaceutical products on the immutable blockchain ledger</p></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Register New Drug</div></div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group"><label class="form-label">Drug Name *</label><input type="text" class="form-control" placeholder="e.g. Amoxicillin" id="dDrugName"/></div>
+                <div class="form-group"><label class="form-label">Generic Name *</label><input type="text" class="form-control" placeholder="INN / Generic name"/></div>
+                <div class="form-group"><label class="form-label">NAFDAC Code *</label><input type="text" class="form-control" placeholder="e.g. A7-2841" id="dNafdac"/></div>
+                <div class="form-group"><label class="form-label">ATC Category</label>
+                  <select class="form-control"><option>Antibiotics</option><option>Analgesics</option><option>Antimalarials</option><option>Cardiovascular</option><option>Diabetes</option><option>Antivirals</option><option>Neurological</option><option>Respiratory</option></select>
+                </div>
+                <div class="form-group"><label class="form-label">Dosage Form *</label>
+                  <select class="form-control"><option>Tablet</option><option>Capsule</option><option>Syrup</option><option>Injection</option><option>Cream / Ointment</option><option>Inhaler</option><option>Eye/Ear Drops</option></select>
+                </div>
+                <div class="form-group"><label class="form-label">Strength *</label><input type="text" class="form-control" placeholder="e.g. 500mg"/></div>
+                <div class="form-group"><label class="form-label">Batch / Lot Number *</label><input type="text" class="form-control" placeholder="e.g. BTH-2025-0441" id="dBatch"/></div>
+                <div class="form-group"><label class="form-label">Quantity (Units)</label><input type="number" class="form-control" placeholder="e.g. 10000"/></div>
+                <div class="form-group"><label class="form-label">Manufacture Date *</label><input type="date" class="form-control"/></div>
+                <div class="form-group"><label class="form-label">Expiry Date *</label><input type="date" class="form-control"/></div>
+                <div class="form-group form-full"><label class="form-label">Storage Conditions</label><input type="text" class="form-control" placeholder="e.g. Store below 30°C, protect from light"/></div>
+                <div class="form-group form-full"><label class="form-label">Active Ingredients</label><textarea class="form-control" placeholder="List active ingredient(s) with quantities" style="min-height:70px;"></textarea></div>
+                <div class="form-group form-full"><label class="form-label">Special Instructions / Contraindications</label><textarea class="form-control" placeholder="Any warnings, contraindications, or special notes..."></textarea></div>
+              </div>
+              <hr class="divider"/>
+              <div style="display:flex;gap:10px;">
+                <button class="btn btn-primary" onclick="dashRegisterDrug()">⛓️ Register on Blockchain</button>
+                <button class="btn btn-outline">Clear Form</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card mb-20">
+              <div class="card-header"><div class="card-title">Generated Blockchain ID</div></div>
+              <div class="card-body">
+                <div style="background:var(--c-navy);border-radius:var(--r);padding:18px;margin-bottom:14px;">
+                  <div style="font-family:var(--ff-mono);font-size:0.7rem;color:rgba(255,255,255,0.45);margin-bottom:6px;">DRUG HASH (SHA-256)</div>
+                  <div style="font-family:var(--ff-mono);font-size:0.75rem;color:#5eead4;word-break:break-all;line-height:1.7;" id="genHash">— Register a drug to generate its blockchain hash —</div>
+                  <div style="margin-top:10px;font-family:var(--ff-mono);font-size:0.7rem;color:rgba(255,255,255,0.35);">BLOCK TIMESTAMP: <span id="genTimestamp">—</span></div>
+                </div>
+                <div style="text-align:center;padding:16px;background:var(--c-bg);border-radius:var(--r);font-size:48px;">📱<br/><span style="font-size:0.78rem;color:var(--c-muted);font-family:var(--ff-mono);">QR CODE APPEARS HERE</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Recently Registered</div></div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead><tr><th>Code</th><th>Name</th><th>Date</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td class="color-blue font-mono">A7-2841</td><td>Amoxicillin 500mg</td><td>Feb 16</td><td><span class="badge badge-green">Active</span></td></tr>
+                    <tr><td class="color-blue font-mono">B3-1902</td><td>Paracetamol 1g</td><td>Feb 15</td><td><span class="badge badge-green">Active</span></td></tr>
+                    <tr><td class="color-blue font-mono">C8-3341</td><td>Ibuprofen 400mg</td><td>Feb 14</td><td><span class="badge badge-green">Active</span></td></tr>
+                    <tr><td class="color-blue font-mono">D2-0091</td><td>Metronidazole 250mg</td><td>Feb 13</td><td><span class="badge badge-amber">Review</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DP: USER MANAGEMENT -->
+      <div id="dp-user-reg" class="dash-sub" style="display:none;">
+        <div style="margin-bottom:28px;"><h2 style="font-size:1.4rem;margin-bottom:4px;">User Management</h2><p style="font-size:0.85rem;color:var(--c-muted);">Manage all registered users across the PharmChain network</p></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Add New User</div></div>
+            <div class="card-body">
+              <div class="form-group mb-16"><label class="form-label">Role *</label>
+                <select class="form-control"><option>Manufacturer</option><option>Distributor</option><option>Retailer</option><option>Hospital</option><option>Regulator</option></select>
+              </div>
+              <div class="form-grid">
+                <div class="form-group"><label class="form-label">First Name *</label><input type="text" class="form-control" placeholder="First Name"/></div>
+                <div class="form-group"><label class="form-label">Last Name *</label><input type="text" class="form-control" placeholder="Last Name"/></div>
+                <div class="form-group form-full"><label class="form-label">Organization</label><input type="text" class="form-control" placeholder="Company name"/></div>
+                <div class="form-group"><label class="form-label">License No. *</label><input type="text" class="form-control" placeholder="PCN-XXXX"/></div>
+                <div class="form-group"><label class="form-label">Email *</label><input type="email" class="form-control" placeholder="email@org.com"/></div>
+                <div class="form-group"><label class="form-label">Phone *</label><input type="tel" class="form-control" placeholder="+234 ..."/></div>
+              </div>
+              <hr class="divider"/>
+              <button class="btn btn-primary" onclick="showToast('👤 User account created successfully!')">Create User Account</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">User Directory</div></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Name</th><th>Role</th><th>License</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>PharmaCorp Ltd</strong><br/><span style="font-size:0.75rem;color:var(--c-muted);">pharmacorp@mail.com</span></td><td><span class="badge badge-navy">MANUFACTURER</span></td><td class="font-mono text-xs">PCN-001</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td><strong>HealthDist Nigeria</strong><br/><span style="font-size:0.75rem;color:var(--c-muted);">hdist@mail.com</span></td><td><span class="badge badge-blue">DISTRIBUTOR</span></td><td class="font-mono text-xs">WHL-049</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td><strong>City Pharmacy</strong><br/><span style="font-size:0.75rem;color:var(--c-muted);">city@pharma.ng</span></td><td><span class="badge badge-teal">RETAILER</span></td><td class="font-mono text-xs">RTL-112</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td><strong>NAFDAC Inspector</strong><br/><span style="font-size:0.75rem;color:var(--c-muted);">agent@nafdac.gov.ng</span></td><td><span class="badge badge-red">REGULATOR</span></td><td class="font-mono text-xs">REG-001</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td><strong>LUTH Hospital</strong><br/><span style="font-size:0.75rem;color:var(--c-muted);">luth@hospital.gov</span></td><td><span class="badge badge-amber">HOSPITAL</span></td><td class="font-mono text-xs">HSP-008</td><td><span class="badge badge-amber">Pending</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DP: DISTRIBUTOR -->
+      <div id="dp-distributor" class="dash-sub" style="display:none;">
+        <div style="margin-bottom:28px;"><h2 style="font-size:1.4rem;margin-bottom:4px;">Distributor Management</h2><p style="font-size:0.85rem;color:var(--c-muted);">Register and manage wholesale distribution partners</p></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Register Distributor</div></div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group form-full"><label class="form-label">Company Name *</label><input type="text" class="form-control" placeholder="Distributor company name"/></div>
+                <div class="form-group"><label class="form-label">Distributor Type</label><select class="form-control"><option>National</option><option>Regional</option><option>State</option><option>Last Mile</option></select></div>
+                <div class="form-group"><label class="form-label">PCN License No. *</label><input type="text" class="form-control" placeholder="PCN-DIST-XXXX"/></div>
+                <div class="form-group"><label class="form-label">Coverage Zone</label><select class="form-control"><option>National</option><option>South West</option><option>South East</option><option>South South</option><option>North Central</option><option>North East</option><option>North West</option></select></div>
+                <div class="form-group"><label class="form-label">Contact Person</label><input type="text" class="form-control" placeholder="Full name"/></div>
+                <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-control" placeholder="+234 ..."/></div>
+                <div class="form-group form-full"><label class="form-label">Warehouse Address</label><input type="text" class="form-control" placeholder="Full address"/></div>
+                <div class="form-group"><label class="form-label">Cold Chain?</label><select class="form-control"><option>Yes — Full Cold Chain</option><option>Yes — Partial</option><option>No</option></select></div>
+                <div class="form-group"><label class="form-label">Fleet Size</label><input type="number" class="form-control" placeholder="No. of vehicles"/></div>
+              </div>
+              <hr class="divider"/>
+              <button class="btn btn-primary" onclick="showToast('🏭 Distributor registered on blockchain!')">Register Distributor</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Distributor Directory</div></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Distributor</th><th>Zone</th><th>Compliance</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>HealthDist Nigeria</strong><br/><span class="badge badge-blue" style="font-size:0.65rem;">NATIONAL</span></td><td>National</td><td style="color:var(--c-green);font-family:var(--ff-mono);">98.1%</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td><strong>Northern Pharma Dist.</strong><br/><span class="badge badge-teal" style="font-size:0.65rem;">REGIONAL</span></td><td>North West</td><td style="color:var(--c-green);font-family:var(--ff-mono);">95.4%</td><td><span class="badge badge-green">Active</span></td></tr>
+                  <tr><td><strong>EastPharm Supply</strong><br/><span class="badge badge-teal" style="font-size:0.65rem;">REGIONAL</span></td><td>South East</td><td style="color:var(--c-amber);font-family:var(--ff-mono);">87.2%</td><td><span class="badge badge-amber">Review</span></td></tr>
+                  <tr><td><strong>Delta Med Logistics</strong><br/><span class="badge badge-amber" style="font-size:0.65rem;">STATE</span></td><td>South South</td><td style="color:var(--c-green);font-family:var(--ff-mono);">91.7%</td><td><span class="badge badge-green">Active</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DP: WHOLESALE -->
+      <div id="dp-wholesale" class="dash-sub" style="display:none;">
+        <div style="margin-bottom:28px;"><h2 style="font-size:1.4rem;margin-bottom:4px;">Wholesale Orders</h2><p style="font-size:0.85rem;color:var(--c-muted);">Manage bulk drug transfers from manufacturers to wholesale partners</p></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Create Wholesale Order</div></div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group"><label class="form-label">Drug Code *</label><input type="text" class="form-control" placeholder="e.g. A7-2841"/></div>
+                <div class="form-group"><label class="form-label">Batch Number *</label><input type="text" class="form-control" placeholder="e.g. BTH-2025-0441"/></div>
+                <div class="form-group"><label class="form-label">Destination Wholesaler *</label><select class="form-control"><option>HealthDist Nigeria</option><option>Northern Pharma Dist.</option><option>EastPharm Supply</option></select></div>
+                <div class="form-group"><label class="form-label">Quantity (Units) *</label><input type="number" class="form-control" placeholder="e.g. 10000"/></div>
+                <div class="form-group"><label class="form-label">Unit Price (₦)</label><input type="number" class="form-control" placeholder="e.g. 250.00"/></div>
+                <div class="form-group"><label class="form-label">Dispatch Date</label><input type="date" class="form-control"/></div>
+                <div class="form-group"><label class="form-label">Expected Delivery</label><input type="date" class="form-control"/></div>
+                <div class="form-group"><label class="form-label">Transport Mode</label><select class="form-control"><option>Road — Refrigerated</option><option>Road — Standard</option><option>Air Freight</option></select></div>
+              </div>
+              <hr class="divider"/>
+              <button class="btn btn-primary" onclick="showToast('📦 Wholesale order created on blockchain!')">Create Order</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Active Wholesale Shipments</div></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Order ID</th><th>Drug</th><th>Qty</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td class="color-blue font-mono">WHL-9921</td><td>Amoxicillin 500mg</td><td>10,000</td><td><span class="badge badge-green">Delivered</span></td></tr>
+                  <tr><td class="color-blue font-mono">WHL-9922</td><td>Paracetamol 1g</td><td>25,000</td><td><span class="badge badge-teal">In Transit</span></td></tr>
+                  <tr><td class="color-blue font-mono">WHL-9923</td><td>Metronidazole</td><td>8,000</td><td><span class="badge badge-amber">Pending</span></td></tr>
+                  <tr><td class="color-blue font-mono">WHL-9924</td><td>Ciprofloxacin</td><td>5,000</td><td><span class="badge badge-teal">In Transit</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DP: RETAIL -->
+      <div id="dp-retail" class="dash-sub" style="display:none;">
+        <div style="margin-bottom:28px;"><h2 style="font-size:1.4rem;margin-bottom:4px;">Retail Distribution</h2><p style="font-size:0.85rem;color:var(--c-muted);">Track drugs from wholesalers to pharmacies and retail outlets</p></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Log Retail Dispatch</div></div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group"><label class="form-label">Wholesale Order Ref *</label><input type="text" class="form-control" placeholder="e.g. WHL-9921"/></div>
+                <div class="form-group"><label class="form-label">Drug Code *</label><input type="text" class="form-control" placeholder="e.g. A7-2841"/></div>
+                <div class="form-group"><label class="form-label">Retail Outlet *</label><select class="form-control"><option>City Pharmacy — Lagos</option><option>Medplus — Abuja</option><option>HealthPlus — Kano</option></select></div>
+                <div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-control" placeholder="Units dispatched"/></div>
+                <div class="form-group"><label class="form-label">Retail Price (₦/unit)</label><input type="number" class="form-control" placeholder="Suggested price"/></div>
+                <div class="form-group"><label class="form-label">Dispatch Date</label><input type="date" class="form-control"/></div>
+              </div>
+              <hr class="divider"/>
+              <button class="btn btn-primary" onclick="showToast('🏪 Retail dispatch logged on blockchain!')">Log Dispatch</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Retail Inventory Snapshot</div></div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Outlet</th><th>Drug</th><th>Stock</th><th>Alert</th></tr></thead>
+                <tbody>
+                  <tr><td>City Pharmacy</td><td>Amoxicillin</td><td style="color:var(--c-green);font-family:var(--ff-mono);">2,400</td><td><span class="badge badge-green">OK</span></td></tr>
+                  <tr><td>Medplus Abuja</td><td>Paracetamol</td><td style="color:var(--c-amber);font-family:var(--ff-mono);">120</td><td><span class="badge badge-amber">Low</span></td></tr>
+                  <tr><td>HealthPlus Kano</td><td>Ciprofloxacin</td><td style="color:var(--c-red);font-family:var(--ff-mono);">14</td><td><span class="badge badge-red">Critical</span></td></tr>
+                  <tr><td>CommuniCare</td><td>Ibuprofen</td><td style="color:var(--c-green);font-family:var(--ff-mono);">3,800</td><td><span class="badge badge-green">OK</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DP: ALERTS -->
+      <div id="dp-alerts" class="dash-sub" style="display:none;">
+        <div style="margin-bottom:28px;"><h2 style="font-size:1.4rem;margin-bottom:4px;">System Alerts</h2><p style="font-size:0.85rem;color:var(--c-muted);">Active counterfeit detections, recalls, and compliance violations</p></div>
+        <div class="card mb-24">
+          <div class="card-header"><div class="card-title">🔴 Critical Alerts</div></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Alert ID</th><th>Type</th><th>Drug</th><th>Detail</th><th>Location</th><th>Time</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td class="color-blue font-mono">ALT-9921</td><td><span class="badge badge-red">COUNTERFEIT</span></td><td>CIPRO-250</td><td>Hash mismatch — not on blockchain</td><td>Lagos</td><td class="font-mono text-xs">Feb 16 08:42</td><td><button class="btn btn-red btn-sm" onclick="showToast('🚨 Drug quarantined!')">Quarantine</button></td></tr>
+                <tr><td class="color-blue font-mono">ALT-9918</td><td><span class="badge badge-amber">EXPIRED</span></td><td>AMOX-034</td><td>Batch expired Jan 2025, still distributed</td><td>Abuja</td><td class="font-mono text-xs">Feb 15 14:11</td><td><button class="btn btn-red btn-sm" onclick="showToast('📢 Recall issued!')">Recall</button></td></tr>
+                <tr><td class="color-blue font-mono">ALT-9914</td><td><span class="badge badge-blue">COLD CHAIN</span></td><td>PARA-007</td><td>Temperature exceeded 30°C in transit</td><td>Kano</td><td class="font-mono text-xs">Feb 14 19:03</td><td><button class="btn btn-outline btn-sm" onclick="showToast('🔍 Investigation started!')">Investigate</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- DP: BLOCKCHAIN LEDGER -->
+      <div id="dp-blockchain" class="dash-sub" style="display:none;">
+        <div style="margin-bottom:28px;"><h2 style="font-size:1.4rem;margin-bottom:4px;">Blockchain Ledger</h2><p style="font-size:0.85rem;color:var(--c-muted);">Immutable transaction history — all drug events permanently recorded</p></div>
+        <div class="card mb-20">
+          <div class="card-header"><div class="card-title">Chain Visualization</div></div>
+          <div class="card-body"><div class="chain-blocks" id="chainBlocksFull"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Transaction Log</div>
+            <select class="form-control" style="width:160px;font-size:0.82rem;padding:6px 10px;">
+              <option>All Types</option><option>REGISTER</option><option>TRANSFER</option><option>VERIFY</option><option>FLAG</option>
+            </select>
+          </div>
+          <div class="table-wrap"><table class="data-table" id="ledgerFull"><thead><tr><th>Block</th><th>Tx Hash</th><th>Event</th><th>Drug</th><th>Actor</th><th>Time</th><th>Status</th></tr></thead><tbody id="ledgerBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- DP: ANALYTICS -->
+      <div id="dp-analytics" class="dash-sub" style="display:none;">
+        <div style="margin-bottom:28px;"><h2 style="font-size:1.4rem;margin-bottom:4px;">Reports & Analytics</h2><p style="font-size:0.85rem;color:var(--c-muted);">Supply chain performance and verification metrics</p></div>
+        <div class="stat-cards" style="grid-template-columns:repeat(4,1fr);">
+          <div class="stat-card"><div class="stat-card-bar stat-bar-blue"></div><div class="stat-label">Monthly Verifications</div><div class="stat-value">84,142</div><div class="stat-change" style="color:var(--c-green);">↑ 12% MoM</div></div>
+          <div class="stat-card"><div class="stat-card-bar stat-bar-green"></div><div class="stat-label">Counterfeits Caught</div><div class="stat-value">204</div><div class="stat-change text-muted">₦18.4M prevented</div></div>
+          <div class="stat-card"><div class="stat-card-bar stat-bar-amber"></div><div class="stat-label">Recalls Issued</div><div class="stat-value">7</div><div class="stat-change text-muted">Feb 2026</div></div>
+          <div class="stat-card"><div class="stat-card-bar" style="background:var(--c-blue);"></div><div class="stat-label">Blockchain Uptime</div><div class="stat-value">99.97%</div><div class="stat-change" style="color:var(--c-green);">Last 365 days</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Top Drug Categories</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.88rem;"><span>Antibiotics</span><span class="font-mono color-blue">34.2%</span></div><div style="height:6px;background:var(--c-border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:34.2%;background:linear-gradient(90deg,var(--c-blue),var(--c-teal));border-radius:99px;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.88rem;"><span>Analgesics</span><span class="font-mono color-blue">22.8%</span></div><div style="height:6px;background:var(--c-border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:22.8%;background:linear-gradient(90deg,var(--c-blue),var(--c-teal));border-radius:99px;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.88rem;"><span>Antimalarials</span><span class="font-mono color-blue">18.1%</span></div><div style="height:6px;background:var(--c-border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:18.1%;background:linear-gradient(90deg,var(--c-teal),var(--c-green));border-radius:99px;"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:0.88rem;"><span>Cardiovascular</span><span class="font-mono color-blue">11.3%</span></div><div style="height:6px;background:var(--c-border);border-radius:99px;overflow:hidden;"><div style="height:100%;width:11.3%;background:var(--c-amber);border-radius:99px;"></div></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Geographic Compliance</div></div>
+            <div class="table-wrap"><table class="data-table"><thead><tr><th>State</th><th>Verifications</th><th>Alerts</th><th>Grade</th></tr></thead><tbody>
+              <tr><td>Lagos</td><td style="color:var(--c-green);">24,821</td><td>3</td><td><span class="badge badge-green">A+</span></td></tr>
+              <tr><td>Abuja FCT</td><td style="color:var(--c-green);">18,442</td><td>1</td><td><span class="badge badge-green">A+</span></td></tr>
+              <tr><td>Kano</td><td style="color:var(--c-blue);">12,091</td><td>4</td><td><span class="badge badge-blue">A</span></td></tr>
+              <tr><td>Rivers</td><td style="color:var(--c-blue);">9,830</td><td>2</td><td><span class="badge badge-blue">A</span></td></tr>
+              <tr><td>Ogun</td><td style="color:var(--c-amber);">6,104</td><td>6</td><td><span class="badge badge-amber">B</span></td></tr>
+            </tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DP: SETTINGS -->
+      <div id="dp-settings" class="dash-sub" style="display:none;">
+        <div style="margin-bottom:28px;"><h2 style="font-size:1.4rem;margin-bottom:4px;">Settings</h2><p style="font-size:0.85rem;color:var(--c-muted);">Configure blockchain node, notifications, and account settings</p></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Blockchain Configuration</div></div>
+            <div class="card-body"><div class="form-grid">
+              <div class="form-group form-full"><label class="form-label">Network</label><select class="form-control"><option>PharmChain MainNet</option><option>TestNet</option></select></div>
+              <div class="form-group form-full"><label class="form-label">Node Endpoint</label><input type="text" class="form-control" value="https://node.pharmchain.ng:8545"/></div>
+              <div class="form-group"><label class="form-label">Block Confirmations</label><input type="number" class="form-control" value="6"/></div>
+              <div class="form-group"><label class="form-label">Gas Limit</label><input type="number" class="form-control" value="21000"/></div>
+            </div><hr class="divider"/><button class="btn btn-primary" onclick="showToast('⚙️ Settings saved!')">Save Config</button></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Account & Security</div></div>
+            <div class="card-body"><div class="form-grid">
+              <div class="form-group form-full"><label class="form-label">Organization Name</label><input type="text" class="form-control" value="PharmaCorp Ltd"/></div>
+              <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" value="admin@pharmacorp.ng"/></div>
+              <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-control" value="+234 800 000 0001"/></div>
+              <div class="form-group form-full"><label class="form-label">Two-Factor Auth</label><select class="form-control"><option>Enabled — SMS</option><option>Enabled — Authenticator App</option><option>Disabled</option></select></div>
+            </div><hr class="divider"/><button class="btn btn-primary" onclick="showToast('✅ Account updated!')">Update Account</button></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dash-content -->
+  </div><!-- /dash-wrap -->
+</div><!-- /page-dashboard -->
+
+
+<!-- =========================================================
+     ██ PAGE: ABOUT
+     ========================================================= -->
+<div class="page-section" id="page-about">
+  <div style="background:var(--c-navy);padding:60px 0 48px;">
+    <div class="container-sm text-center">
+      <div class="section-label" style="background:rgba(14,165,160,0.2);color:#5eead4;">About PharmChain</div>
+      <h1 style="color:#fff;margin-bottom:14px;">Fighting Counterfeit Drugs with Blockchain</h1>
+      <p style="color:rgba(255,255,255,0.65);font-size:1.05rem;">PharmChain is a distributed ledger platform designed to eliminate fake drugs from the pharmaceutical supply chain through cryptographic verification, real-time tracking, and transparent record-keeping.</p>
+    </div>
+  </div>
+  <div class="container section">
+    <div class="grid-2" style="gap:48px;align-items:center;margin-bottom:60px;">
+      <div><div class="section-label">The Problem</div><h2 style="margin-bottom:14px;">1 in 10 drugs in developing markets is fake or substandard</h2><p style="margin-bottom:14px;">According to the WHO, approximately 10% of medical products in low- and middle-income countries are falsified or substandard. In Nigeria, NAFDAC estimates that up to 25% of drugs in circulation at any given time may not be genuine.</p><p>Counterfeit drugs kill hundreds of thousands of people annually — and current supply chain systems lack the transparency, speed, and security needed to prevent this at scale.</p></div>
+      <div class="card" style="background:linear-gradient(135deg,var(--c-red-lt),var(--c-amber-lt));border-color:var(--c-red);">
+        <div class="card-body text-center">
+          <div style="font-size:52px;margin-bottom:14px;">☠️</div>
+          <div style="font-family:var(--ff-head);font-size:2.5rem;font-weight:800;color:var(--c-red);">270,000+</div>
+          <div style="font-weight:600;color:var(--c-navy);margin-bottom:8px;">Deaths per year from counterfeit drugs</div>
+          <div style="font-size:0.85rem;color:var(--c-sub);">Source: WHO / Lancet, 2023 estimates</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:48px;align-items:center;">
+      <div class="card" style="background:linear-gradient(135deg,var(--c-blue-lt),var(--c-teal-lt));border-color:var(--c-teal);">
+        <div class="card-body text-center">
+          <div style="font-size:52px;margin-bottom:14px;">⛓️</div>
+          <div style="font-family:var(--ff-head);font-size:2.5rem;font-weight:800;color:var(--c-blue);">Zero</div>
+          <div style="font-weight:600;color:var(--c-navy);margin-bottom:8px;">Tolerance for drug counterfeiting</div>
+          <div style="font-size:0.85rem;color:var(--c-sub);">PharmChain's cryptographic ledger makes tampering mathematically impossible</div>
+        </div>
+      </div>
+      <div><div class="section-label">Our Solution</div><h2 style="margin-bottom:14px;">Blockchain makes drug fraud mathematically impossible</h2><p style="margin-bottom:14px;">PharmChain assigns every registered drug a unique cryptographic hash on a distributed blockchain ledger. Any tampering — even changing a single character — produces a completely different hash, instantly detectable.</p><p>From manufacturer to patient, every step is recorded, timestamped, and immutable. Anyone with a smartphone can verify a drug's complete history in under 2 seconds.</p></div>
+    </div>
+  </div>
+</div><!-- /page-about -->
+
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div class="brand-mark">⛓</div><div style="font-family:var(--ff-head);font-size:1.2rem;font-weight:800;color:#fff;">Pharm<span style="color:#5eead4;">Chain</span></div></div>
+        <p>Blockchain-powered drug verification, supply chain tracking, and anti-counterfeit platform. Protecting lives through transparent pharmaceutical supply chains.</p>
+        <div class="footer-badges" style="margin-top:16px;">
+          <div class="f-badge">ISO 27001</div>
+          <div class="f-badge">NAFDAC CERTIFIED</div>
+          <div class="f-badge">HIPAA</div>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <div class="footer-links">
+          <a class="footer-link" href="#" onclick="showPage('drugs')">Drug Database</a>
+          <a class="footer-link" href="#" onclick="showPage('verify')">Verify a Drug</a>
+          <a class="footer-link" href="#" onclick="showPage('tracking')">Track Shipment</a>
+          <a class="footer-link" href="#" onclick="showPage('dashboard')">Dashboard</a>
+          <a class="footer-link" href="#">API Access</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Register As</h4>
+        <div class="footer-links">
+          <a class="footer-link" href="#" onclick="showPage('register')">Manufacturer</a>
+          <a class="footer-link" href="#" onclick="showPage('register')">Distributor</a>
+          <a class="footer-link" href="#" onclick="showPage('register')">Pharmacy</a>
+          <a class="footer-link" href="#" onclick="showPage('register')">Hospital</a>
+          <a class="footer-link" href="#" onclick="showPage('register')">Regulator</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <div class="footer-links">
+          <a class="footer-link" href="#" onclick="showPage('about')">About PharmChain</a>
+          <a class="footer-link" href="#">Help Center</a>
+          <a class="footer-link" href="#">API Documentation</a>
+          <a class="footer-link" href="#">Contact NAFDAC</a>
+          <a class="footer-link" href="#">Report a Counterfeit</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 PharmChain Network. All rights reserved. Not a substitute for professional medical advice.</div>
+      <div style="display:flex;gap:16px;"><a href="#" class="footer-link">Privacy Policy</a><a href="#" class="footer-link">Terms of Service</a><a href="#" class="footer-link">Cookie Policy</a></div>
+    </div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+<script>
+// ---- DATA ----
+const drugDB = [
+  {name:'Amoxicillin 500mg',generic:'Amoxicillin',code:'A7-2841',form:'Capsule',cat:'Antibiotics',mfr:'PharmaCorp Ltd',status:'verified'},
+  {name:'Paracetamol 1000mg',generic:'Acetaminophen',code:'B3-1902',form:'Tablet',cat:'Analgesics',mfr:'HealthGen Industries',status:'verified'},
+  {name:'Ibuprofen 400mg',generic:'Ibuprofen',code:'C8-3341',form:'Tablet',cat:'Analgesics',mfr:'MediTech Nigeria',status:'verified'},
+  {name:'Metronidazole 250mg',generic:'Metronidazole',code:'D2-0091',form:'Tablet',cat:'Antibiotics',mfr:'PharmaCorp Ltd',status:'review'},
+  {name:'Ciprofloxacin 500mg',generic:'Ciprofloxacin',code:'C9-1021',form:'Tablet',cat:'Antibiotics',mfr:'GlobalPharma GmbH',status:'verified'},
+  {name:'Artemether/Lumefantrine',generic:'Artemether+Lumefantrine',code:'AL-4402',form:'Tablet',cat:'Antimalarials',mfr:'MediTech Nigeria',status:'verified'},
+  {name:'Metformin 500mg',generic:'Metformin HCl',code:'M5-2201',form:'Tablet',cat:'Diabetes',mfr:'HealthGen Industries',status:'verified'},
+  {name:'Amlodipine 5mg',generic:'Amlodipine besylate',code:'A3-9910',form:'Tablet',cat:'Cardiovascular',mfr:'PharmaCorp Ltd',status:'verified'},
+  {name:'Azithromycin 250mg',generic:'Azithromycin',code:'A4-3311',form:'Capsule',cat:'Antibiotics',mfr:'GlobalPharma GmbH',status:'verified'},
+  {name:'Lisinopril 10mg',generic:'Lisinopril',code:'L2-0881',form:'Tablet',cat:'Cardiovascular',mfr:'MediTech Nigeria',status:'verified'},
+  {name:'Amoxicillin+Clavulanate 875mg',generic:'Co-Amoxiclav',code:'A7-2842',form:'Tablet',cat:'Antibiotics',mfr:'PharmaCorp Ltd',status:'verified'},
+  {name:'Omeprazole 20mg',generic:'Omeprazole',code:'O1-5530',form:'Capsule',cat:'Gastrointestinal',mfr:'HealthGen Industries',status:'verified'},
+  {name:'Atorvastatin 40mg',generic:'Atorvastatin',code:'AT-2201',form:'Tablet',cat:'Cardiovascular',mfr:'GlobalPharma GmbH',status:'verified'},
+  {name:'Loratadine 10mg',generic:'Loratadine',code:'L9-0041',form:'Tablet',cat:'Antihistamines',mfr:'MediTech Nigeria',status:'verified'},
+  {name:'Doxycycline 100mg',generic:'Doxycycline',code:'D3-8801',form:'Capsule',cat:'Antibiotics',mfr:'PharmaCorp Ltd',status:'recalled'},
+];
+
+const statusBadge = (s) => s==='verified' ? '<span class="badge badge-green">✓ Verified</span>' : s==='review' ? '<span class="badge badge-amber">⚠ Review</span>' : '<span class="badge badge-red">🔴 Recalled</span>';
+
+// ---- NAVIGATION ----
+function showPage(id) {
+  document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const map = {home:'Home',drugs:'Drug Database ▾',tracking:'Track Shipment',verify:'Verify Drug',about:'About'};
+  document.querySelectorAll('.nav-link').forEach(l => { if(l.textContent.trim() === (map[id]||'')) l.classList.add('active'); });
+  if(id==='drugs') buildDrugTable(drugDB);
+  if(id==='dashboard') { buildDashFeed(); buildChain('chainBlocksWidget'); buildLedger(); }
+  if(id==='drug-detail') buildChain('chainBlocksWidget');
+}
+
+// ---- DRUG TABLE ----
+function buildDrugTable(data) {
+  const az = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const azBar = document.getElementById('azBar');
+  if(azBar && !azBar.dataset.built) {
+    azBar.dataset.built = '1';
+    [...az,'0-9'].forEach(l => {
+      const b = document.createElement('button');
+      b.className = 'az-btn'; b.textContent = l;
+      b.onclick = () => filterDrugTable(l === '0-9' ? '0' : l);
+      azBar.appendChild(b);
+    });
+  }
+  const tbody = document.getElementById('drugTableBody');
+  if(!tbody) return;
+  tbody.innerHTML = data.map(d => `
+    <tr>
+      <td><strong style="cursor:pointer;color:var(--c-blue);" onclick="drugDetail('${d.generic.split('/')[0].toLowerCase()}')">${d.name}</strong><br/><span style="font-size:0.75rem;color:var(--c-muted);">${d.generic}</span></td>
+      <td class="font-mono text-xs color-blue">${d.code}</td>
+      <td>${d.form}</td>
+      <td><span class="badge badge-blue">${d.cat}</span></td>
+      <td>${d.mfr}</td>
+      <td>${statusBadge(d.status)}</td>
+      <td><button class="btn btn-ghost btn-sm" style="color:var(--c-blue);" onclick="drugDetail('${d.generic.split('/')[0].toLowerCase()}')">View →</button></td>
+    </tr>
+  `).join('');
+  document.getElementById('drugCount').textContent = `— ${data.length} results`;
+}
+
+function filterDrugTable(q) {
+  const f = drugDB.filter(d => d.name.toLowerCase().includes(q.toLowerCase()) || d.code.toLowerCase().includes(q.toLowerCase()) || d.mfr.toLowerCase().includes(q.toLowerCase()) || d.cat.toLowerCase().includes(q.toLowerCase()));
+  buildDrugTable(f.length ? f : drugDB);
+}
+function filterByCategory(c) { if(!c) buildDrugTable(drugDB); else buildDrugTable(drugDB.filter(d=>d.cat===c)); }
+function clearFilters() { buildDrugTable(drugDB); document.getElementById('dbSearch').value = ''; }
+
+// ---- NAV SEARCH ----
+function navSearchInput(v) {
+  const box = document.getElementById('navSearchResults');
+  if(!v.trim()) { box.classList.remove('open'); return; }
+  const res = drugDB.filter(d => d.name.toLowerCase().includes(v.toLowerCase()) || d.code.toLowerCase().includes(v.toLowerCase())).slice(0,6);
+  box.innerHTML = res.map(d => `
+    <div class="search-result-item" onclick="drugDetail('${d.generic.split('/')[0].toLowerCase()}')">
+      <div class="sri-icon">💊</div>
+      <div><div class="sri-name">${d.name}</div><div class="sri-meta">${d.code} · ${d.cat} · ${d.mfr}</div></div>
+      <div class="sri-badge">${statusBadge(d.status)}</div>
+    </div>
+  `).join('') || `<div style="padding:16px;text-align:center;color:var(--c-muted);font-size:0.88rem;">No results for "${v}"</div>`;
+  box.classList.add('open');
+}
+function closeNavSearch() { document.getElementById('navSearchResults').classList.remove('open'); }
+
+// ---- HERO SEARCH ----
+function heroSearchInput(v) {}
+function setHeroTab(el) { document.querySelectorAll('.hero-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); }
+function doHeroSearch() { const v = document.getElementById('heroSearch').value; if(v) { showPage('drugs'); setTimeout(()=>filterDrugTable(v),50); } }
+
+// ---- DRUG DETAIL ----
+function drugDetail(slug) {
+  showPage('drug-detail');
+  const d = drugDB.find(x => x.generic.toLowerCase().startsWith(slug)) || drugDB[0];
+  document.getElementById('detailDrugName').textContent = d.name;
+  document.getElementById('detailBreadcrumb').textContent = d.name;
+}
+
+// ---- DRUG TABS ----
+function switchDrugTab(id, el) {
+  document.querySelectorAll('.drug-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.drug-tab-pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dtab-'+id).classList.add('active');
+}
+
+// ---- VERIFY ----
+function selVerifyType(el, type) {
+  document.querySelectorAll('#verifyTypeSel .role-opt').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected');
+  const labels = {drug:'NAFDAC Drug Code', batch:'Batch Number', hash:'Blockchain Hash (0x...)'};
+  document.getElementById('verifyInputLabel').textContent = labels[type];
+}
+function runVerify() {
+  const v = document.getElementById('verifyMainInput').value.trim();
+  const res = document.getElementById('verifyResult');
+  res.style.display = 'block';
+  if(!v) { res.innerHTML = '<div class="warning-box amber"><div class="warning-icon">⚠️</div><div><div class="warning-title">Please enter a drug code or hash</div></div></div>'; return; }
+  const isFake = v.includes('fake') || v.includes('0000') || v.includes('FAKE');
+  if(isFake) {
+    res.innerHTML = `<div class="warning-box red"><div class="warning-icon">🚨</div><div><div class="warning-title" style="color:var(--c-red);">VERIFICATION FAILED — COUNTERFEIT DETECTED</div><div class="warning-text">The code <strong>${v}</strong> does not match any record on the PharmChain blockchain. This drug may be counterfeit, tampered with, or unregistered. Do not consume. Report to NAFDAC immediately: <strong>0800-NAFDAC</strong>.</div></div></div>`;
+  } else {
+    const d = drugDB.find(x => x.code.toLowerCase() === v.toLowerCase()) || drugDB[0];
+    res.innerHTML = `
+      <div class="warning-box green"><div class="warning-icon">✅</div><div><div class="warning-title" style="color:var(--c-green);">VERIFIED AUTHENTIC — Found on Blockchain</div><div class="warning-text">This drug has been verified against the PharmChain distributed ledger.</div></div></div>
+      <div class="card mt-16"><div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <table class="info-table">
+            <tr><td>Drug Name</td><td><strong>${d.name}</strong></td></tr>
+            <tr><td>NAFDAC Code</td><td class="font-mono color-blue">${d.code}</td></tr>
+            <tr><td>Manufacturer</td><td>${d.mfr}</td></tr>
+            <tr><td>Category</td><td>${d.cat}</td></tr>
+            <tr><td>Dosage Form</td><td>${d.form}</td></tr>
+            <tr><td>Blockchain Status</td><td>${statusBadge(d.status)}</td></tr>
+          </table>
+          <div class="chain-verify-box"><div class="chain-verified">✅ BLOCKCHAIN VERIFIED</div><div class="chain-hash">a3f2b1c8d9e4f7a6b5c4d3e2f1a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0</div><div style="margin-top:12px;font-size:0.8rem;color:rgba(255,255,255,0.6);">Block #2,847,391 · 1,006,362 confirmations</div></div>
+        </div>
+      </div></div>
+    `;
+  }
+  showToast(isFake ? '🚨 COUNTERFEIT DRUG DETECTED!' : '✅ Drug verified as authentic!');
+}
+
+// ---- TRACKING ----
+function doTrack() {
+  const v = document.getElementById('trackInput').value.trim();
+  if(!v) return;
+  document.getElementById('trackTimeline').style.display = 'block';
+  document.getElementById('trackTimeline').innerHTML = `
+    <div style="font-family:var(--ff-head);font-size:0.95rem;font-weight:700;color:var(--c-navy);margin-bottom:14px;">📍 Tracking: ${v}</div>
+    <div class="journey-steps">
+      <div class="journey-step"><div class="journey-left"><div class="journey-dot done"></div><div class="journey-line"></div></div><div class="journey-content"><div class="journey-title">🏭 Manufactured — PharmaCorp Ltd, Lagos</div><div class="journey-meta">Feb 10, 2025 · Batch BTH-2025-0441</div></div></div>
+      <div class="journey-step"><div class="journey-left"><div class="journey-dot done"></div><div class="journey-line"></div></div><div class="journey-content"><div class="journey-title">✅ Quality Control Passed</div><div class="journey-meta">Feb 11, 2025 · QC Cert: QC-2025-01441</div></div></div>
+      <div class="journey-step"><div class="journey-left"><div class="journey-dot done"></div><div class="journey-line"></div></div><div class="journey-content"><div class="journey-title">📦 Dispatched to HealthDist Nigeria</div><div class="journey-meta">Feb 12, 2025 · 10,000 units · Shipment SHP-48821</div></div></div>
+      <div class="journey-step"><div class="journey-left"><div class="journey-dot done"></div><div class="journey-line"></div></div><div class="journey-content"><div class="journey-title">🏪 Retail Delivery — City Pharmacy, Lagos Island</div><div class="journey-meta">Feb 14, 2025 · 2,400 units received</div></div></div>
+      <div class="journey-step"><div class="journey-left"><div class="journey-dot current"></div></div><div class="journey-content"><div class="journey-title" style="color:var(--c-teal);">✅ Current — Verified at Point of Dispensing</div><div class="journey-meta">Feb 16, 2025 · Patient scan confirmed</div></div></div>
+    </div>
+  `;
+  showToast('🗺️ Tracking ' + v + '...');
+}
+
+// ---- AUTH ----
+function doLogin() {
+  const e = document.getElementById('loginEmail').value;
+  const p = document.getElementById('loginPass').value;
+  if(!e || !p) { showToast('⚠️ Please enter your email and password'); return; }
+  showToast('✅ Signing in...');
+  setTimeout(() => showPage('dashboard'), 800);
+}
+function doRegister() {
+  showToast('✅ Account created! Verification email sent. Awaiting license check (24–48hrs).');
+  setTimeout(() => showPage('login'), 1500);
+}
+function nextRegStep(step) {
+  [1,2,3].forEach(i => { document.getElementById('regStep'+i).style.display = i===step ? 'block' : 'none'; });
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('s'+i);
+    el.classList.remove('done','active');
+    if(i < step) { el.classList.add('done'); el.innerHTML = '✓'; el.style.background='var(--c-blue)';el.style.borderColor='var(--c-blue)';el.style.color='#fff'; }
+    else if(i === step) { el.classList.add('active'); el.textContent=i; el.style.background='';el.style.borderColor='var(--c-blue)';el.style.color='var(--c-blue)'; }
+    else { el.textContent=i; el.style.background='';el.style.borderColor='var(--c-border)';el.style.color='var(--c-muted)'; }
+  });
+}
+function selRegRole(el) { document.querySelectorAll('#regStep1 .role-opt').forEach(r=>r.classList.remove('selected')); el.classList.add('selected'); }
+
+// ---- DASHBOARD ----
+function dPage(id, navEl) {
+  document.querySelectorAll('.dash-sub').forEach(p => p.style.display='none');
+  const el = document.getElementById(id);
+  if(el) el.style.display='block';
+  document.querySelectorAll('.dash-nav-item').forEach(n=>n.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  if(id==='dp-blockchain') { buildChain('chainBlocksFull'); buildLedger(); }
+}
+function dashRegisterDrug() {
+  const n = document.getElementById('dDrugName').value || 'Drug';
+  const hash = '0x' + Array.from({length:40},()=>Math.floor(Math.random()*16).toString(16)).join('');
+  document.getElementById('genHash').textContent = hash;
+  document.getElementById('genTimestamp').textContent = new Date().toISOString() + ' · Block #' + (2847391 + Math.floor(Math.random()*10)).toLocaleString();
+  showToast('⛓️ ' + n + ' registered on blockchain!');
+}
+function buildDashFeed() {
+  const drugs=['AMOX-500','PARA-1g','CIPRO-500','IBU-400','METRO-250'];
+  const events=[['REGISTER','badge-blue'],['TRANSFER','badge-teal'],['VERIFY','badge-green'],['FLAG','badge-amber']];
+  const tbody = document.getElementById('dashFeed');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  for(let i=0;i<6;i++){
+    const [ev,cls] = events[Math.floor(Math.random()*events.length)];
+    const d = drugs[Math.floor(Math.random()*drugs.length)];
+    const bn = 2847391 - i;
+    tbody.innerHTML += `<tr><td class="font-mono color-blue">#${bn.toLocaleString()}</td><td><span class="badge ${cls}">${ev}</span></td><td>${d}-00${i}</td><td><span class="badge badge-green">✓ Mined</span></td></tr>`;
+  }
+}
+function buildChain(targetId) {
+  const c = document.getElementById(targetId);
+  if(!c) return;
+  c.innerHTML = '';
+  for(let i=0;i<6;i++){
+    const bn = 2847391 - i;
+    const hash = '0x' + Array.from({length:8},()=>Math.floor(Math.random()*16).toString(16)).join('');
+    const blk = document.createElement('div');
+    blk.className='chain-blk';
+    blk.innerHTML = `<div class="chain-blk-num">BLK #${bn.toLocaleString()}</div><div class="chain-blk-data">${hash}...</div><div class="chain-blk-status"><span class="badge badge-green" style="font-size:0.6rem;">✓ Verified</span></div>`;
+    c.appendChild(blk);
+    if(i<5){const a=document.createElement('div');a.className='chain-arrow';a.innerHTML='→';c.appendChild(a);}
+  }
+}
+function buildLedger() {
+  const tbody = document.getElementById('ledgerBody');
+  if(!tbody) return;
+  const drugs=['AMOX-500','PARA-1g','CIPRO-500','IBU-400','METRO-250'];
+  const events=[['REGISTER','badge-blue'],['TRANSFER','badge-teal'],['VERIFY','badge-green'],['FLAG','badge-amber'],['RECALL','badge-red']];
+  const actors=['PharmaCorp','HealthDist','City Pharmacy','NAFDAC Agent','MediTech'];
+  tbody.innerHTML = '';
+  for(let i=0;i<12;i++){
+    const [ev,cls]=events[Math.floor(Math.random()*events.length)];
+    const d=drugs[Math.floor(Math.random()*drugs.length)];
+    const a=actors[Math.floor(Math.random()*actors.length)];
+    const bn=2847391-i;
+    const hash='0x'+Array.from({length:8},()=>Math.floor(Math.random()*16).toString(16)).join('');
+    tbody.innerHTML+=`<tr><td class="font-mono color-blue text-xs">#${bn.toLocaleString()}</td><td class="font-mono text-xs" style="color:var(--c-teal);">${hash}...</td><td><span class="badge ${cls}">${ev}</span></td><td>${d}</td><td>${a}</td><td class="text-xs font-mono">Feb 16, ${10-Math.floor(i/2)}:${String(i%60).padStart(2,'0')} AM</td><td><span class="badge badge-green">Mined</span></td></tr>`;
+  }
+}
+
+// ---- LIVE FEED (homepage) ----
+function buildLiveFeed() {
+  const list = document.getElementById('liveFeedList');
+  if(!list) return;
+  const drugs=['AMOX-500-MG','PARA-1000-MG','CIPRO-250-MG','IBU-400-MG','METRO-500-MG'];
+  const evColors={REGISTER:'var(--c-blue)',TRANSFER:'var(--c-teal)',VERIFY:'var(--c-green)',FLAG:'var(--c-amber)'};
+  let items = [];
+  for(let i=0;i<5;i++){
+    const ev=Object.keys(evColors)[Math.floor(Math.random()*4)];
+    const d=drugs[Math.floor(Math.random()*drugs.length)];
+    items.push(`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--c-bg);font-size:0.8rem;">
+      <div style="width:6px;height:6px;border-radius:50%;background:${evColors[ev]};flex-shrink:0;"></div>
+      <div style="font-family:var(--ff-mono);font-size:0.7rem;color:var(--c-sub);">${ev}</div>
+      <div style="font-weight:600;color:var(--c-navy);flex:1;">${d}</div>
+      <div style="font-family:var(--ff-mono);font-size:0.68rem;color:var(--c-muted);">just now</div>
+    </div>`);
+  }
+  list.innerHTML = items.join('');
+}
+
+// ---- TOAST ----
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ---- CLOCK & LIVE STATS ----
+let blockNum = 2847391;
+setInterval(() => {
+  blockNum += Math.floor(Math.random()*2);
+  const el = document.getElementById('homeBlockNum');
+  if(el) el.textContent = '#' + blockNum.toLocaleString();
+  buildLiveFeed();
+}, 6000);
+
+// ---- INIT ----
+buildLiveFeed();
+buildDrugTable(drugDB);
+</script>
+
+</body>
+</html>
